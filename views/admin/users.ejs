@@ -100,10 +100,23 @@
                     <td class="px-6 py-4">
                       <% if (u.role === 'student' && u.studentClass) { %>
                         <div class="text-sm text-gray-600">القسم: <%= u.studentClass %></div>
+                        <% if (u.classNumber) { %>
+                          <div class="text-xs text-gray-500">الصف: <%= u.classNumber %></div>
+                        <% } %>
                       <% } else if (u.role === 'teacher' && u.subject) { %>
                         <div class="text-sm text-gray-600">المادة: <%= u.subject %></div>
-                      <% } else if (u.role === 'parent' && u.childName) { %>
-                        <div class="text-sm text-gray-600">الابن: <%= u.childName %></div>
+                      <% } else if (u.role === 'parent') { %>
+                        <% if (u.childFirstName && u.childLastName) { %>
+                          <div class="text-sm text-gray-600">
+                            <i class="fas fa-user-graduate ml-1 text-purple-600"></i>
+                            <%= u.childFirstName %> <%= u.childLastName %>
+                          </div>
+                        <% } else { %>
+                          <div class="text-sm text-red-600">
+                            <i class="fas fa-exclamation-triangle ml-1"></i>
+                            غير مربوط
+                          </div>
+                        <% } %>
                       <% } else { %>
                         <div class="text-sm text-gray-400">-</div>
                       <% } %>
@@ -111,7 +124,13 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <%= new Date(u.created_at).toLocaleDateString('ar-TN') %>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2 space-x-reverse">
+                      <% if (u.role === 'parent') { %>
+                        <button onclick="linkParent(<%= u.id %>, '<%= u.name %>', '<%= u.childFirstName || '' %>', '<%= u.childLastName || '' %>')" 
+                                class="text-blue-600 hover:text-blue-900">
+                          <i class="fas fa-link"></i> ربط
+                        </button>
+                      <% } %>
                       <% if (u.id !== user.id) { %>
                         <form method="POST" action="/admin/users/delete/<%= u.id %>" class="inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا المستخدم؟');">
                           <button type="submit" class="text-red-600 hover:text-red-900">
@@ -150,6 +169,58 @@
     </div>
   </section>
 
+  <!-- Modal ربط ولي الأمر -->
+  <div id="linkParentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+      <div class="mt-3">
+        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">ربط ولي الأمر بابنه</h3>
+        <form id="linkParentForm" method="POST">
+          <input type="hidden" id="parentId" name="parentId">
+          
+          <div class="mb-4">
+            <label class="block text-gray-700 font-semibold mb-2">اسم ولي الأمر</label>
+            <input type="text" id="parentName" class="input-field" readonly>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-gray-700 font-semibold mb-2">الاسم الأول للابن <span class="text-red-500">*</span></label>
+            <input type="text" id="childFirstName" name="childFirstName" class="input-field" required>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-gray-700 font-semibold mb-2">اللقب للابن <span class="text-red-500">*</span></label>
+            <input type="text" id="childLastName" name="childLastName" class="input-field" required>
+          </div>
+          
+          <div class="flex justify-end gap-3 mt-6">
+            <button type="button" onclick="closeLinkModal()" class="btn bg-gray-300 hover:bg-gray-400 text-black">
+              إلغاء
+            </button>
+            <button type="submit" class="btn bg-blue-600 hover:bg-blue-700 text-white">
+              <i class="fas fa-link ml-2"></i>
+              ربط
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <%- include('../partials/footer') %>
+  
+  <script>
+    function linkParent(id, name, firstName, lastName) {
+      document.getElementById('parentId').value = id;
+      document.getElementById('parentName').value = name;
+      document.getElementById('childFirstName').value = firstName;
+      document.getElementById('childLastName').value = lastName;
+      document.getElementById('linkParentForm').action = `/admin/users/link-parent/${id}`;
+      document.getElementById('linkParentModal').classList.remove('hidden');
+    }
+    
+    function closeLinkModal() {
+      document.getElementById('linkParentModal').classList.add('hidden');
+    }
+  </script>
 </body>
 </html>

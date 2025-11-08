@@ -5,6 +5,8 @@ const Notification = require('./Notification');
 const Feedback = require('./Feedback');
 const AdminLog = require('./AdminLog');
 const Schedule = require('./Schedule');
+const Grade = require('./Grade');
+const StudentRecord = require('./StudentRecord');
 
 // تعريف العلاقات بين النماذج
 const models = {
@@ -14,7 +16,9 @@ const models = {
   Notification,
   Feedback,
   AdminLog,
-  Schedule
+  Schedule,
+  Grade,
+  StudentRecord
 };
 
 // تطبيق العلاقات

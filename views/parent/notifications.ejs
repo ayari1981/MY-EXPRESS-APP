@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إشعارات الابن - المدرسة الإعدادية</title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+  <%- include('../partials/navbar') %>
+
+  <section class="py-8 min-h-screen">
+    <div class="container mx-auto px-4">
+      <!-- العنوان -->
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+          <i class="fas fa-bell ml-2 text-orange-600"></i>
+          إشعارات الابن
+        </h1>
+        <% if (hasChild) { %>
+          <p class="text-gray-600">متابعة غيابات وعقوبات: <span class="font-bold text-primary-600"><%= childName %></span></p>
+        <% } else { %>
+          <p class="text-gray-600">لم يتم ربط حسابك بابنك بعد</p>
+        <% } %>
+      </div>
+
+      <%- include('../partials/messages') %>
+
+      <% if (!hasChild) { %>
+        <div class="bg-yellow-50 border-r-4 border-yellow-500 p-8 rounded-lg shadow-md">
+          <div class="flex items-start">
+            <i class="fas fa-exclamation-triangle text-yellow-600 text-3xl ml-4 mt-1"></i>
+            <div>
+              <h3 class="text-xl font-bold text-yellow-800 mb-3">لم يتم ربط حسابك بعد</h3>
+              <p class="text-yellow-700 mb-4 leading-relaxed">
+                للاطلاع على سجلات ابنك (الغيابات والعقوبات)، يجب ربط حسابك بحساب الابن أولاً.
+              </p>
+              <div class="bg-yellow-100 p-4 rounded-lg">
+                <p class="text-yellow-800 font-semibold mb-2">
+                  <i class="fas fa-info-circle ml-1"></i>كيفية الربط:
+                </p>
+                <ul class="list-disc list-inside text-yellow-700 mr-4 space-y-2">
+                  <li>تواصل مع الإدارة لربط حسابك بحساب ابنك</li>
+                  <li>أو سجل خروج وأعد التسجيل بإدخال اسم ابنك الكامل</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } else { %>
+        <!-- الإحصائيات -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-500 text-sm mb-1">إجمالي السجلات</p>
+                <p class="text-3xl font-bold text-gray-800"><%= stats.totalRecords %></p>
+              </div>
+              <div class="bg-blue-100 rounded-full p-4">
+                <i class="fas fa-clipboard-list text-blue-600 text-2xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-500 text-sm mb-1">غير مقروءة</p>
+                <p class="text-3xl font-bold text-purple-600"><%= stats.unreadRecords %></p>
+              </div>
+              <div class="bg-purple-100 rounded-full p-4">
+                <i class="fas fa-envelope text-purple-600 text-2xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-500 text-sm mb-1">الغيابات</p>
+                <p class="text-3xl font-bold text-orange-600"><%= stats.absences %></p>
+              </div>
+              <div class="bg-orange-100 rounded-full p-4">
+                <i class="fas fa-user-times text-orange-600 text-2xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-500 text-sm mb-1">العقوبات</p>
+                <p class="text-3xl font-bold text-red-600"><%= stats.punishments %></p>
+              </div>
+              <div class="bg-red-100 rounded-full p-4">
+                <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- الفلاتر -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+          <form method="GET" action="/parent/notifications" class="w-full">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">نوع السجل</label>
+                <select name="recordType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option value="">الكل</option>
+                  <option value="absence" <%= filters.recordType === 'absence' ? 'selected' : '' %>>غياب</option>
+                  <option value="punishment" <%= filters.recordType === 'punishment' ? 'selected' : '' %>>عقوبة</option>
+                  <option value="note" <%= filters.recordType === 'note' ? 'selected' : '' %>>ملاحظة</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">الحالة</label>
+                <select name="isRead" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option value="">الكل</option>
+                  <option value="false" <%= filters.isRead === 'false' ? 'selected' : '' %>>غير مقروءة</option>
+                  <option value="true" <%= filters.isRead === 'true' ? 'selected' : '' %>>مقروءة</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">من تاريخ</label>
+                <input type="date" name="startDate" value="<%= filters.startDate || '' %>" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">إلى تاريخ</label>
+                <input type="date" name="endDate" value="<%= filters.endDate || '' %>" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+            </div>
+            
+            <div class="mt-6 flex gap-3">
+              <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition shadow-md">
+                <i class="fas fa-filter ml-2"></i>تصفية
+              </button>
+              <a href="/parent/notifications" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 py-2 rounded-lg transition shadow-md">
+                <i class="fas fa-redo ml-2"></i>إعادة تعيين
+              </a>
+              <% if (stats.unreadRecords > 0) { %>
+                <form method="POST" action="/parent/notifications/mark-all-read" class="inline">
+                  <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition shadow-md">
+                    <i class="fas fa-check-double ml-2"></i>تعليم الكل كمقروء
+                  </button>
+                </form>
+              <% } %>
+            </div>
+          </form>
+        </div>
+
+        <!-- قائمة السجلات -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <% if (records.length === 0) { %>
+            <div class="p-12 text-center">
+              <i class="fas fa-inbox text-6xl mb-4 text-gray-300"></i>
+              <p class="text-xl text-gray-500 font-semibold">لا توجد إشعارات حالياً</p>
+              <p class="text-gray-400 mt-2">ستظهر هنا الغيابات والعقوبات الخاصة بابنك</p>
+            </div>
+          <% } else { %>
+            <div class="divide-y divide-gray-200">
+              <% records.forEach(record => { %>
+                <div class="p-6 hover:bg-gray-50 transition <%= !record.isRead ? 'bg-blue-50 border-r-4 border-blue-500' : '' %>">
+                  <div class="flex items-start justify-between gap-4">
+                    <!-- معلومات السجل -->
+                    <div class="flex-1">
+                      <div class="flex items-center gap-3 mb-3">
+                        <!-- أيقونة النوع -->
+                        <% if (record.recordType === 'absence') { %>
+                          <div class="bg-orange-100 rounded-full p-3">
+                            <i class="fas fa-user-times text-orange-600 text-xl"></i>
+                          </div>
+                        <% } else if (record.recordType === 'punishment') { %>
+                          <div class="bg-red-100 rounded-full p-3">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                          </div>
+                        <% } else { %>
+                          <div class="bg-green-100 rounded-full p-3">
+                            <i class="fas fa-sticky-note text-green-600 text-xl"></i>
+                          </div>
+                        <% } %>
+
+                        <!-- العنوان -->
+                        <div class="flex-1">
+                          <div class="flex items-center gap-2">
+                            <h3 class="text-lg font-bold text-gray-900">
+                              <% if (record.recordType === 'absence') { %>
+                                غياب - <%= record.absenceType === 'justified' ? 'مبرر' : 'غير مبرر' %>
+                              <% } else if (record.recordType === 'punishment') { %>
+                                <% 
+                                  const punishmentTypes = {
+                                    'warning': 'إنذار',
+                                    'detention': 'توقيف',
+                                    'suspension': 'طرد مؤقت',
+                                    'other': 'عقوبة أخرى'
+                                  };
+                                %>
+                                عقوبة - <%= punishmentTypes[record.punishmentType] || record.punishmentType %>
+                              <% } else { %>
+                                ملاحظة
+                              <% } %>
+                            </h3>
+                            
+                            <!-- شارة جديد -->
+                            <% if (!record.isRead) { %>
+                              <span class="bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-bold animate-pulse">
+                                <i class="fas fa-star ml-1"></i>جديد
+                              </span>
+                            <% } %>
+                          </div>
+                          
+                          <p class="text-sm text-gray-500 mt-1">
+                            <i class="fas fa-calendar ml-1"></i>
+                            <%= new Date(record.date).toLocaleDateString('ar-TN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+                          </p>
+                        </div>
+                      </div>
+
+                      <!-- التفاصيل -->
+                      <% if (record.recordType === 'punishment' && record.punishmentSeverity) { %>
+                        <% 
+                          const severities = {
+                            'minor': 'بسيطة',
+                            'medium': 'متوسطة',
+                            'severe': 'شديدة'
+                          };
+                          const severityColors = {
+                            'minor': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                            'medium': 'bg-orange-100 text-orange-800 border-orange-300',
+                            'severe': 'bg-red-100 text-red-800 border-red-300'
+                          };
+                        %>
+                        <div class="mt-3">
+                          <span class="px-3 py-1 text-sm font-semibold rounded-lg border <%= severityColors[record.punishmentSeverity] %>">
+                            <i class="fas fa-exclamation-circle ml-1"></i>
+                            درجة الخطورة: <%= severities[record.punishmentSeverity] %>
+                          </span>
+                        </div>
+                      <% } %>
+
+                      <% if (record.description) { %>
+                        <div class="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <p class="text-sm font-bold text-gray-700 mb-2">
+                            <i class="fas fa-file-alt ml-1"></i>الوصف:
+                          </p>
+                          <p class="text-sm text-gray-800 leading-relaxed"><%= record.description %></p>
+                        </div>
+                      <% } %>
+
+                      <% if (record.notes) { %>
+                        <div class="mt-3 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                          <p class="text-sm font-bold text-blue-700 mb-2">
+                            <i class="fas fa-clipboard ml-1"></i>ملاحظات:
+                          </p>
+                          <p class="text-sm text-blue-800 leading-relaxed"><%= record.notes %></p>
+                        </div>
+                      <% } %>
+
+                      <!-- معلومات المسجل -->
+                      <div class="mt-4 flex items-center text-xs text-gray-500 gap-4">
+                        <span>
+                          <i class="fas fa-user-tie ml-1"></i>
+                          سجل بواسطة: <strong><%= record.recorder ? record.recorder.name : 'الإدارة' %></strong>
+                        </span>
+                        <span>•</span>
+                        <span>
+                          <i class="fas fa-clock ml-1"></i>
+                          <%= new Date(record.createdAt).toLocaleDateString('ar-TN') %>
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- زر التعليم كمقروء -->
+                    <div class="flex-shrink-0">
+                      <% if (!record.isRead) { %>
+                        <form method="POST" action="/parent/notifications/mark-read/<%= record.id %>">
+                          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition shadow-md">
+                            <i class="fas fa-check ml-2"></i>تعليم كمقروء
+                          </button>
+                        </form>
+                      <% } else { %>
+                        <div class="text-green-600 text-center">
+                          <i class="fas fa-check-circle text-3xl"></i>
+                          <p class="text-xs mt-1 font-semibold">مقروء</p>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+</body>
+</html>

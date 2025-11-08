@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <section class="min-h-screen bg-gray-100 py-8">
+    <div class="container mx-auto px-4">
+      <div class="mb-6 flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-800">
+          <i class="fas fa-plus-circle ml-2 text-primary-600"></i>
+          إضافة نتائج
+        </h1>
+        <a href="/teacher/grades" class="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-6 py-3 rounded-lg shadow-md">
+          <i class="fas fa-arrow-right ml-2"></i>
+          رجوع
+        </a>
+      </div>
+
+      <%- include('../partials/messages') %>
+
+      <div class="card p-6">
+        <form id="gradesForm" method="POST" action="/teacher/grades/add-bulk">
+          <!-- معلومات الفرض -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div>
+              <label class="block text-gray-700 font-semibold mb-2">القسم (المستوى) <span class="text-red-500">*</span></label>
+              <select name="studentClass" id="classSelect" class="input-field" required onchange="loadStudents()">
+                <option value="">اختر القسم</option>
+                <option value="السابعة أساسي">السابعة أساسي</option>
+                <option value="الثامنة أساسي">الثامنة أساسي</option>
+                <option value="التاسعة أساسي">التاسعة أساسي</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-semibold mb-2">رقم الصف <span class="text-red-500">*</span></label>
+              <select name="classNumber" class="input-field" required onchange="loadStudents()">
+                <option value="">اختر رقم الصف</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-semibold mb-2">المادة <span class="text-red-500">*</span></label>
+              <input type="text" name="subject" class="input-field" placeholder="مثال: الرياضيات" required>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-semibold mb-2">نوع الفرض <span class="text-red-500">*</span></label>
+              <select name="gradeType" class="input-field" required onchange="updateMaxGrade()">
+                <option value="">اختر النوع</option>
+                <option value="فرض عادي">فرض عادي</option>
+                <option value="فرض تأليفي">فرض تأليفي</option>
+                <option value="شفاهي">شفاهي</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div>
+              <label class="block text-gray-700 font-semibold mb-2">الثلاثي <span class="text-red-500">*</span></label>
+              <select name="semester" class="input-field" required>
+                <option value="">اختر الثلاثي</option>
+                <option value="الفصل الأول">الفصل الأول</option>
+                <option value="الفصل الثاني">الفصل الثاني</option>
+                <option value="الفصل الثالث">الفصل الثالث</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-semibold mb-2">السنة الدراسية</label>
+              <input type="text" name="academicYear" class="input-field" value="2024-2025" placeholder="2024-2025">
+            </div>
+          </div>
+
+          <!-- جدول التلاميذ -->
+          <div id="studentsContainer" class="hidden">
+            <div class="mb-4 flex justify-between items-center">
+              <h3 class="text-xl font-bold text-gray-800">قائمة التلاميذ</h3>
+              <span id="studentCount" class="text-gray-600"></span>
+            </div>
+
+            <div class="overflow-x-auto mb-6">
+              <table class="w-full" id="studentsTable">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">التلميذ</th>
+                    <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+                      العلامة <span id="maxGradeDisplay">(/ 20)</span>
+                    </th>
+                    <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">ملاحظات</th>
+                  </tr>
+                </thead>
+                <tbody id="studentsBody">
+                  <!-- سيتم ملؤه ديناميكيا -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="flex justify-end space-x-reverse space-x-4">
+              <a href="/teacher/grades" class="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-6 py-3 rounded-lg">إلغاء</a>
+              <button type="submit" class="bg-green-400 hover:bg-green-500 text-black font-semibold px-6 py-3 rounded-lg shadow-md">
+                <i class="fas fa-save ml-2"></i>
+                حفظ النتائج
+              </button>
+            </div>
+          </div>
+
+          <div id="loadingMessage" class="hidden text-center py-8">
+            <i class="fas fa-spinner fa-spin text-4xl text-primary-600 mb-4"></i>
+            <p class="text-gray-600">جاري تحميل التلاميذ...</p>
+          </div>
+
+          <div id="noStudentsMessage" class="hidden text-center py-8">
+            <i class="fas fa-users-slash text-6xl text-gray-300 mb-4"></i>
+            <p class="text-xl text-gray-500">لا يوجد تلاميذ في هذا القسم</p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    let currentMaxGrade = 20;
+
+    function updateMaxGrade() {
+      const gradeType = document.querySelector('select[name="gradeType"]').value;
+      
+      if (gradeType === 'شفاهي') {
+        currentMaxGrade = 10;
+      } else {
+        currentMaxGrade = 20;
+      }
+      
+      document.getElementById('maxGradeDisplay').textContent = `(/ ${currentMaxGrade})`;
+      
+      // تحديث max في جميع حقول الإدخال
+      const gradeInputs = document.querySelectorAll('.grade-input');
+      gradeInputs.forEach(input => {
+        input.max = currentMaxGrade;
+      });
+    }
+
+    async function loadStudents() {
+      const classLevel = document.getElementById('classSelect').value;
+      const classNumber = document.querySelector('select[name="classNumber"]').value;
+      
+      if (!classLevel || !classNumber) {
+        document.getElementById('studentsContainer').classList.add('hidden');
+        return;
+      }
+
+      // إظهار رسالة التحميل
+      document.getElementById('studentsContainer').classList.add('hidden');
+      document.getElementById('loadingMessage').classList.remove('hidden');
+      document.getElementById('noStudentsMessage').classList.add('hidden');
+
+      try {
+        const response = await fetch(`/teacher/grades/students?class=${encodeURIComponent(classLevel)}&classNumber=${encodeURIComponent(classNumber)}`);
+        const students = await response.json();
+
+        const tbody = document.getElementById('studentsBody');
+        tbody.innerHTML = '';
+
+        if (students.length === 0) {
+          document.getElementById('loadingMessage').classList.add('hidden');
+          document.getElementById('noStudentsMessage').classList.remove('hidden');
+          return;
+        }
+
+        students.forEach((student, index) => {
+          const row = document.createElement('tr');
+          row.className = 'border-b hover:bg-gray-50';
+          row.innerHTML = `
+            <td class="px-4 py-3">
+              <div class="font-semibold text-gray-800">
+                ${student.firstName} ${student.lastName}
+              </div>
+              <input type="hidden" name="students[${index}][studentId]" value="${student.id}">
+              <input type="hidden" name="students[${index}][studentFirstName]" value="${student.firstName}">
+              <input type="hidden" name="students[${index}][studentLastName]" value="${student.lastName}">
+            </td>
+            <td class="px-4 py-3">
+              <input type="number" 
+                     name="students[${index}][gradeValue]" 
+                     class="input-field grade-input" 
+                     min="0" 
+                     max="${currentMaxGrade}" 
+                     step="0.25"
+                     placeholder="0.00">
+            </td>
+            <td class="px-4 py-3">
+              <input type="text" 
+                     name="students[${index}][remarks]" 
+                     class="input-field" 
+                     placeholder="ملاحظات (اختياري)">
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        document.getElementById('studentCount').textContent = `${students.length} تلميذ`;
+        document.getElementById('loadingMessage').classList.add('hidden');
+        document.getElementById('studentsContainer').classList.remove('hidden');
+
+      } catch (error) {
+        console.error('خطأ في تحميل التلاميذ:', error);
+        alert('حدث خطأ في تحميل التلاميذ');
+        document.getElementById('loadingMessage').classList.add('hidden');
+      }
+    }
+
+    // التحقق من الإدخال عند الإرسال
+    document.getElementById('gradesForm').addEventListener('submit', function(e) {
+      const gradeInputs = document.querySelectorAll('.grade-input');
+      let hasGrade = false;
+
+      gradeInputs.forEach(input => {
+        if (input.value && input.value.trim() !== '') {
+          hasGrade = true;
+        }
+      });
+
+      if (!hasGrade) {
+        e.preventDefault();
+        alert('يرجى إدخال علامة واحدة على الأقل');
+        return false;
+      }
+    });
+  </script>
+</body>
+</html>

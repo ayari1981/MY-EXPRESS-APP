@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { ensureAdmin } = require('../middleware/auth');
-const { User, Lesson, Comment, Feedback, Schedule } = require('../models');
+const { User, Lesson, Comment, Feedback, Schedule, Grade } = require('../models');
 const { Op } = require('sequelize');
 const multer = require('multer');
 const path = require('path');
@@ -444,6 +444,175 @@ router.get('/schedules/download/:id', ensureAdmin, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('حدث خطأ');
+  }
+});
+
+// ============ إدارة النتائج ============
+
+// عرض جميع النتائج
+router.get('/grades', ensureAdmin, async (req, res) => {
+  try {
+    const { classLevel, subject, semester, teacherId } = req.query;
+    
+    const whereClause = {};
+    if (classLevel) whereClause.studentClass = classLevel;
+    if (subject) whereClause.subject = subject;
+    if (semester) whereClause.semester = semester;
+    if (teacherId) whereClause.teacherId = teacherId;
+    
+    const grades = await Grade.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: User,
+          as: 'student',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: User,
+          as: 'teacher',
+          attributes: ['id', 'name', 'email']
+        }
+      ],
+      order: [['studentClass', 'ASC'], ['subject', 'ASC'], ['studentLastName', 'ASC']]
+    });
+    
+    // جلب جميع المعلمين
+    const teachers = await User.findAll({
+      where: { role: 'teacher' },
+      attributes: ['id', 'name', 'teacherSubject'],
+      order: [['name', 'ASC']]
+    });
+    
+    // إحصائيات
+    const stats = {
+      totalGrades: await Grade.count(),
+      publishedGrades: await Grade.count({ where: { isPublished: true } }),
+      totalStudents: await User.count({ where: { role: 'student' } }),
+      totalTeachers: await User.count({ where: { role: 'teacher' } })
+    };
+    
+    res.render('admin/grades', {
+      title: 'إدارة النتائج',
+      user: req.user,
+      grades,
+      teachers,
+      stats,
+      filters: { classLevel, subject, semester, teacherId }
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+// عرض نتائج تلميذ معين
+router.get('/grades/student/:id', ensureAdmin, async (req, res) => {
+  try {
+    const student = await User.findByPk(req.params.id);
+    
+    if (!student || student.role !== 'student') {
+      req.flash('error_msg', 'التلميذ غير موجود');
+      return res.redirect('/admin/grades');
+    }
+    
+    const grades = await Grade.findAll({
+      where: { studentId: student.id },
+      include: [{
+        model: User,
+        as: 'teacher',
+        attributes: ['id', 'name', 'teacherSubject']
+      }],
+      order: [['semester', 'ASC'], ['subject', 'ASC']]
+    });
+    
+    // حساب المعدلات
+    const gradesBySubject = {};
+    const gradesBySemester = {};
+    
+    grades.forEach(grade => {
+      if (!gradesBySubject[grade.subject]) {
+        gradesBySubject[grade.subject] = [];
+      }
+      gradesBySubject[grade.subject].push(grade);
+      
+      if (!gradesBySemester[grade.semester]) {
+        gradesBySemester[grade.semester] = [];
+      }
+      gradesBySemester[grade.semester].push(grade);
+    });
+    
+    const averages = {};
+    for (const [subject, subjectGrades] of Object.entries(gradesBySubject)) {
+      const total = subjectGrades.reduce((sum, g) => sum + parseFloat(g.gradeValue), 0);
+      averages[subject] = (total / subjectGrades.length).toFixed(2);
+    }
+    
+    let generalAverage = 0;
+    if (grades.length > 0) {
+      const total = grades.reduce((sum, g) => sum + parseFloat(g.gradeValue), 0);
+      generalAverage = (total / grades.length).toFixed(2);
+    }
+    
+    res.render('admin/student-grades', {
+      title: `نتائج ${student.name}`,
+      user: req.user,
+      student,
+      grades,
+      averages,
+      generalAverage,
+      gradesBySubject,
+      gradesBySemester
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/admin/grades');
+  }
+});
+
+// حذف نتيجة
+router.post('/grades/delete/:id', ensureAdmin, async (req, res) => {
+  try {
+    const grade = await Grade.findByPk(req.params.id);
+    
+    if (!grade) {
+      req.flash('error_msg', 'النتيجة غير موجودة');
+      return res.redirect('/admin/grades');
+    }
+    
+    await grade.destroy();
+    
+    req.flash('success_msg', 'تم حذف النتيجة بنجاح');
+    res.redirect('/admin/grades');
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ أثناء الحذف');
+    res.redirect('/admin/grades');
+  }
+});
+
+// ربط ولي الأمر بابنه
+router.post('/users/link-parent/:id', ensureAdmin, async (req, res) => {
+  try {
+    const { childFirstName, childLastName } = req.body;
+    
+    await User.update(
+      { 
+        childFirstName: childFirstName.trim(),
+        childLastName: childLastName.trim()
+      },
+      { where: { id: req.params.id, role: 'parent' } }
+    );
+    
+    req.flash('success_msg', `تم ربط ولي الأمر بـ ${childFirstName} ${childLastName} بنجاح`);
+    res.redirect('/admin/users?role=parent');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ أثناء ربط ولي الأمر');
+    res.redirect('/admin/users');
   }
 });
 

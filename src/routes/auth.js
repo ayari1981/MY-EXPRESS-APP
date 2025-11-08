@@ -52,7 +52,7 @@ router.get('/register', ensureGuest, (req, res) => {
 
 // معالجة التسجيل
 router.post('/register', async (req, res) => {
-  const { name, email, password, password2, role, classLevel, section, subject } = req.body;
+  const { name, email, password, password2, role, classLevel, classNumber, subject, childFirstName, childLastName } = req.body;
   
   let errors = [];
 
@@ -67,6 +67,11 @@ router.post('/register', async (req, res) => {
 
   if (password.length < 6) {
     errors.push({ msg: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' });
+  }
+  
+  // التحقق من بيانات ولي الأمر
+  if (role === 'parent' && (!childFirstName || !childLastName)) {
+    errors.push({ msg: 'يجب إدخال اسم الابن كاملاً' });
   }
 
   if (errors.length > 0) {
@@ -107,10 +112,13 @@ router.post('/register', async (req, res) => {
     // إضافة البيانات الخاصة بكل دور
     if (role === 'student') {
       newUserData.studentClass = classLevel;
-      newUserData.studentSection = section;
+      newUserData.classNumber = classNumber;
     } else if (role === 'teacher') {
       newUserData.teacherSubject = subject;
       newUserData.teacherClasses = [];
+    } else if (role === 'parent') {
+      newUserData.childFirstName = childFirstName ? childFirstName.trim() : null;
+      newUserData.childLastName = childLastName ? childLastName.trim() : null;
     }
 
     await User.create(newUserData);

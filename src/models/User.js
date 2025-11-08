@@ -35,6 +35,11 @@ const User = sequelize.define('User', {
     allowNull: true,
     field: 'student_class'
   },
+  classNumber: {
+    type: DataTypes.STRING(10),
+    allowNull: true,
+    field: 'class_number'
+  },
   studentSection: {
     type: DataTypes.STRING(10),
     allowNull: true,
@@ -68,6 +73,16 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(20),
     allowNull: true,
     field: 'parent_phone'
+  },
+  childFirstName: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'child_first_name'
+  },
+  childLastName: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'child_last_name'
   },
   profilePicture: {
     type: DataTypes.STRING(255),

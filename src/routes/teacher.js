@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { ensureTeacher } = require('../middleware/auth');
 const upload = require('../middleware/upload');
-const { Lesson, User, Notification, Schedule } = require('../models');
+const { Lesson, User, Notification, Schedule, Grade, StudentRecord } = require('../models');
 const { Op } = require('sequelize');
 const path = require('path');
 const fs = require('fs');
@@ -332,6 +332,488 @@ router.get('/schedules/download/:id', ensureTeacher, async (req, res) => {
     console.error(err);
     req.flash('error_msg', 'حدث خطأ');
     res.redirect('/teacher/schedules');
+  }
+});
+
+// ============ إدارة النتائج والأعداد ============
+
+// صفحة إدارة النتائج
+router.get('/grades', ensureTeacher, async (req, res) => {
+  try {
+    const { classLevel, classNumber, semester } = req.query;
+    
+    const whereClause = {
+      teacherId: req.user.id
+    };
+    
+    if (classLevel) whereClause.studentClass = classLevel;
+    if (classNumber) whereClause.classNumber = classNumber;
+    if (semester) whereClause.semester = semester;
+    
+    const grades = await Grade.findAll({
+      where: whereClause,
+      include: [{
+        model: User,
+        as: 'student',
+        attributes: ['id', 'name', 'email']
+      }],
+      order: [['studentClass', 'ASC'], ['classNumber', 'ASC'], ['studentLastName', 'ASC'], ['created_at', 'DESC']]
+    });
+    
+    // إحصائيات
+    const stats = {
+      totalGrades: await Grade.count({ where: { teacherId: req.user.id } }),
+      publishedGrades: await Grade.count({ where: { teacherId: req.user.id, isPublished: true } }),
+      unpublishedGrades: await Grade.count({ where: { teacherId: req.user.id, isPublished: false } })
+    };
+    
+    res.render('teacher/grades', {
+      title: 'إدارة النتائج',
+      user: req.user,
+      grades,
+      stats,
+      filters: { classLevel, classNumber, semester }
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/teacher/dashboard');
+  }
+});
+
+// صفحة إضافة نتائج
+router.get('/grades/add', ensureTeacher, async (req, res) => {
+  try {
+    res.render('teacher/grades-add', {
+      title: 'إضافة نتائج',
+      user: req.user
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/teacher/grades');
+  }
+});
+
+// البحث عن التلاميذ حسب القسم
+router.get('/grades/students', ensureTeacher, async (req, res) => {
+  try {
+    const classLevel = req.query.class || req.query.classLevel;
+    const classNumber = req.query.classNumber;
+    
+    if (!classLevel) {
+      return res.json([]);
+    }
+    
+    const whereClause = {
+      role: 'student',
+      studentClass: classLevel
+    };
+    
+    // إضافة رقم الصف إذا تم تحديده
+    if (classNumber) {
+      whereClause.classNumber = classNumber;
+    }
+    
+    const students = await User.findAll({
+      where: whereClause,
+      attributes: ['id', 'name', 'email'],
+      order: [['name', 'ASC']]
+    });
+    
+    // تقسيم الاسم إلى firstName و lastName
+    const studentsData = students.map(student => {
+      const nameParts = student.name.split(' ');
+      return {
+        id: student.id,
+        firstName: nameParts[0] || student.name,
+        lastName: nameParts.slice(1).join(' ') || '',
+        email: student.email
+      };
+    });
+    
+    res.json(studentsData);
+  } catch (err) {
+    console.error('Error loading students:', err);
+    res.status(500).json({ error: 'حدث خطأ' });
+  }
+});
+
+// إضافة نتائج لقسم كامل
+router.post('/grades/add-bulk', ensureTeacher, async (req, res) => {
+  try {
+    const { studentClass, classNumber, subject, gradeType, semester, examDate, students, academicYear } = req.body;
+    
+    if (!studentClass || !subject || !gradeType || !semester || !students) {
+      req.flash('error_msg', 'الرجاء ملء جميع الحقول المطلوبة');
+      return res.redirect('/teacher/grades/add');
+    }
+    
+    // الحصول على اسم المعلم
+    const teacherNames = req.user.name.split(' ');
+    const teacherFirstName = teacherNames[0] || req.user.name;
+    const teacherLastName = teacherNames.slice(1).join(' ') || '';
+    
+    const gradeRecords = [];
+    
+    // معالجة النتائج
+    for (const key in students) {
+      const studentData = students[key];
+      
+      if (studentData.gradeValue && studentData.gradeValue.trim() !== '') {
+        gradeRecords.push({
+          studentId: studentData.studentId,
+          studentFirstName: studentData.studentFirstName,
+          studentLastName: studentData.studentLastName,
+          studentClass: studentClass,
+          classNumber: classNumber || null,
+          teacherId: req.user.id,
+          teacherFirstName,
+          teacherLastName,
+          subject,
+          gradeType,
+          gradeValue: parseFloat(studentData.gradeValue),
+          maxGrade: gradeType === 'شفاهي' ? 10 : 20,
+          semester,
+          academicYear: academicYear || '2024-2025',
+          examDate: examDate || null,
+          remarks: studentData.remarks || null,
+          isPublished: false
+        });
+      }
+    }
+    
+    if (gradeRecords.length === 0) {
+      req.flash('error_msg', 'لم يتم إضافة أي نتائج');
+      return res.redirect('/teacher/grades/add');
+    }
+    
+    await Grade.bulkCreate(gradeRecords);
+    
+    req.flash('success_msg', `تم إضافة ${gradeRecords.length} نتيجة بنجاح`);
+    res.redirect('/teacher/grades');
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ أثناء إضافة النتائج');
+    res.redirect('/teacher/grades/add');
+  }
+});
+
+// تعديل نتيجة
+router.post('/grades/edit/:id', ensureTeacher, async (req, res) => {
+  try {
+    const { gradeValue, remarks } = req.body;
+    
+    const grade = await Grade.findOne({
+      where: {
+        id: req.params.id,
+        teacherId: req.user.id
+      }
+    });
+    
+    if (!grade) {
+      req.flash('error_msg', 'النتيجة غير موجودة');
+      return res.redirect('/teacher/grades');
+    }
+    
+    grade.gradeValue = parseFloat(gradeValue);
+    grade.remarks = remarks || null;
+    await grade.save();
+    
+    req.flash('success_msg', 'تم تحديث النتيجة بنجاح');
+    res.redirect('/teacher/grades');
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ أثناء التحديث');
+    res.redirect('/teacher/grades');
+  }
+});
+
+// نشر/إلغاء نشر نتيجة
+router.post('/grades/publish/:id', ensureTeacher, async (req, res) => {
+  try {
+    const grade = await Grade.findOne({
+      where: {
+        id: req.params.id,
+        teacherId: req.user.id
+      }
+    });
+    
+    if (!grade) {
+      req.flash('error_msg', 'النتيجة غير موجودة');
+      return res.redirect('/teacher/grades');
+    }
+    
+    grade.isPublished = !grade.isPublished;
+    await grade.save();
+    
+    req.flash('success_msg', grade.isPublished ? 'تم نشر النتيجة' : 'تم إلغاء نشر النتيجة');
+    res.redirect('/teacher/grades');
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/teacher/grades');
+  }
+});
+
+// نشر جميع نتائج قسم معين
+router.post('/grades/publish-all', ensureTeacher, async (req, res) => {
+  try {
+    const { classLevel, subject, gradeType, semester } = req.body;
+    
+    const whereClause = {
+      teacherId: req.user.id,
+      isPublished: false
+    };
+    
+    if (classLevel) whereClause.studentClass = classLevel;
+    if (subject) whereClause.subject = subject;
+    if (gradeType) whereClause.gradeType = gradeType;
+    if (semester) whereClause.semester = semester;
+    
+    const result = await Grade.update(
+      { isPublished: true },
+      { where: whereClause }
+    );
+    
+    req.flash('success_msg', `تم نشر ${result[0]} نتيجة`);
+    res.redirect('/teacher/grades');
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/teacher/grades');
+  }
+});
+
+// حذف نتيجة
+router.post('/grades/delete/:id', ensureTeacher, async (req, res) => {
+  try {
+    const grade = await Grade.findOne({
+      where: {
+        id: req.params.id,
+        teacherId: req.user.id
+      }
+    });
+    
+    if (!grade) {
+      req.flash('error_msg', 'النتيجة غير موجودة');
+      return res.redirect('/teacher/grades');
+    }
+    
+    await grade.destroy();
+    
+    req.flash('success_msg', 'تم حذف النتيجة بنجاح');
+    res.redirect('/teacher/grades');
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ أثناء الحذف');
+    res.redirect('/teacher/grades');
+  }
+});
+
+// ============ إدارة سجلات الطلاب (الغيابات والعقوبات) ============
+
+// صفحة عرض السجلات
+router.get('/records', ensureTeacher, async (req, res) => {
+  try {
+    const { classLevel, classNumber, recordType, startDate, endDate } = req.query;
+    
+    const whereClause = {
+      recordedBy: req.user.id
+    };
+    
+    if (recordType) whereClause.recordType = recordType;
+    if (startDate) whereClause.date = { ...whereClause.date, [Op.gte]: startDate };
+    if (endDate) whereClause.date = { ...whereClause.date, [Op.lte]: endDate };
+    
+    let records = await StudentRecord.findAll({
+      where: whereClause,
+      include: [{
+        model: User,
+        as: 'student',
+        attributes: ['id', 'name', 'studentClass', 'classNumber']
+      }],
+      order: [['date', 'DESC'], ['createdAt', 'DESC']]
+    });
+    
+    // تصفية حسب القسم ورقم الصف
+    if (classLevel) {
+      records = records.filter(record => record.student && record.student.studentClass === classLevel);
+    }
+    if (classNumber) {
+      records = records.filter(record => record.student && record.student.classNumber === parseInt(classNumber));
+    }
+    
+    // إحصائيات
+    const stats = {
+      totalRecords: await StudentRecord.count({ where: { recordedBy: req.user.id } }),
+      absences: await StudentRecord.count({ where: { recordedBy: req.user.id, recordType: 'absence' } }),
+      punishments: await StudentRecord.count({ where: { recordedBy: req.user.id, recordType: 'punishment' } }),
+      notes: await StudentRecord.count({ where: { recordedBy: req.user.id, recordType: 'note' } })
+    };
+    
+    res.render('teacher/records', {
+      title: 'سجلات الطلاب',
+      user: req.user,
+      records,
+      stats,
+      filters: { classLevel, classNumber, recordType, startDate, endDate }
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/teacher/dashboard');
+  }
+});
+
+// صفحة إضافة سجل جديد
+router.get('/records/add', ensureTeacher, async (req, res) => {
+  try {
+    res.render('teacher/records-add', {
+      title: 'إضافة سجل طالب',
+      user: req.user
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/teacher/records');
+  }
+});
+
+// إضافة سجل جديد
+router.post('/records/add', ensureTeacher, async (req, res) => {
+  try {
+    const { 
+      studentId, 
+      recordType, 
+      date, 
+      absenceType, 
+      punishmentType, 
+      punishmentSeverity,
+      description, 
+      notes 
+    } = req.body;
+    
+    if (!studentId || !recordType || !date) {
+      req.flash('error_msg', 'الرجاء ملء جميع الحقول المطلوبة');
+      return res.redirect('/teacher/records/add');
+    }
+    
+    // التحقق من وجود الطالب
+    const student = await User.findOne({
+      where: { id: studentId, role: 'student' }
+    });
+    
+    if (!student) {
+      req.flash('error_msg', 'الطالب غير موجود');
+      return res.redirect('/teacher/records/add');
+    }
+    
+    // إنشاء السجل
+    const record = await StudentRecord.create({
+      studentId,
+      recordType,
+      date,
+      absenceType: recordType === 'absence' ? absenceType : null,
+      punishmentType: recordType === 'punishment' ? punishmentType : null,
+      punishmentSeverity: recordType === 'punishment' ? punishmentSeverity : null,
+      description,
+      notes,
+      recordedBy: req.user.id,
+      parentNotified: true,
+      notifiedAt: new Date()
+    });
+    
+    // إرسال إشعار للولي إذا كان مرتبطاً
+    const parent = await User.findOne({
+      where: {
+        role: 'parent',
+        childFirstName: student.name.split(' ')[0],
+        childLastName: student.name.split(' ').slice(1).join(' ')
+      }
+    });
+    
+    if (parent) {
+      const notificationTitle = recordType === 'absence' ? 'غياب' : recordType === 'punishment' ? 'عقوبة' : 'ملاحظة';
+      await Notification.create({
+        userId: parent.id,
+        title: `${notificationTitle} - ${student.name}`,
+        message: description || 'تم تسجيل سجل جديد لابنك',
+        isRead: false
+      });
+    }
+    
+    const recordTypeAr = recordType === 'absence' ? 'الغياب' : recordType === 'punishment' ? 'العقوبة' : 'الملاحظة';
+    req.flash('success_msg', `تم تسجيل ${recordTypeAr} بنجاح`);
+    res.redirect('/teacher/records');
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ أثناء الحفظ');
+    res.redirect('/teacher/records/add');
+  }
+});
+
+// تعديل سجل
+router.post('/records/edit/:id', ensureTeacher, async (req, res) => {
+  try {
+    const { description, notes } = req.body;
+    
+    const record = await StudentRecord.findOne({
+      where: {
+        id: req.params.id,
+        recordedBy: req.user.id
+      }
+    });
+    
+    if (!record) {
+      req.flash('error_msg', 'السجل غير موجود');
+      return res.redirect('/teacher/records');
+    }
+    
+    record.description = description || null;
+    record.notes = notes || null;
+    await record.save();
+    
+    req.flash('success_msg', 'تم تحديث السجل بنجاح');
+    res.redirect('/teacher/records');
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ أثناء التحديث');
+    res.redirect('/teacher/records');
+  }
+});
+
+// حذف سجل
+router.post('/records/delete/:id', ensureTeacher, async (req, res) => {
+  try {
+    const record = await StudentRecord.findOne({
+      where: {
+        id: req.params.id,
+        recordedBy: req.user.id
+      }
+    });
+    
+    if (!record) {
+      req.flash('error_msg', 'السجل غير موجود');
+      return res.redirect('/teacher/records');
+    }
+    
+    await record.destroy();
+    
+    req.flash('success_msg', 'تم حذف السجل بنجاح');
+    res.redirect('/teacher/records');
+    
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ أثناء الحذف');
+    res.redirect('/teacher/records');
   }
 });
 

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <section class="min-h-screen bg-gray-100 py-8">
+    <div class="container mx-auto px-4">
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">
+          <i class="fas fa-chart-bar ml-2 text-primary-600"></i>
+          إدارة النتائج - نظرة عامة
+        </h1>
+      </div>
+
+      <%- include('../partials/messages') %>
+
+      <!-- الإحصائيات -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="card p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 mb-1">إجمالي النتائج</p>
+              <p class="text-3xl font-bold text-primary-600"><%= stats.totalGrades %></p>
+            </div>
+            <div class="text-5xl text-primary-200">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 mb-1">نتائج منشورة</p>
+              <p class="text-3xl font-bold text-green-600"><%= stats.publishedGrades %></p>
+            </div>
+            <div class="text-5xl text-green-200">
+              <i class="fas fa-eye"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 mb-1">غير منشورة</p>
+              <p class="text-3xl font-bold text-orange-600"><%= stats.unpublishedGrades %></p>
+            </div>
+            <div class="text-5xl text-orange-200">
+              <i class="fas fa-eye-slash"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 mb-1">عدد المعلمين</p>
+              <p class="text-3xl font-bold text-blue-600"><%= teachers.length %></p>
+            </div>
+            <div class="text-5xl text-blue-200">
+              <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- فلاتر البحث -->
+      <div class="card p-6 mb-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">
+          <i class="fas fa-filter ml-2"></i>
+          فلاتر البحث
+        </h3>
+        <form method="GET" action="/admin/grades" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">القسم</label>
+            <select name="classLevel" class="input-field">
+              <option value="">جميع الأقسام</option>
+              <option value="السابعة أساسي" <%= filters.classLevel === 'السابعة أساسي' ? 'selected' : '' %>>السابعة أساسي</option>
+              <option value="الثامنة أساسي" <%= filters.classLevel === 'الثامنة أساسي' ? 'selected' : '' %>>الثامنة أساسي</option>
+              <option value="التاسعة أساسي" <%= filters.classLevel === 'التاسعة أساسي' ? 'selected' : '' %>>التاسعة أساسي</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">المادة</label>
+            <input type="text" name="subject" class="input-field" placeholder="مثال: الرياضيات" value="<%= filters.subject || '' %>">
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">الفصل</label>
+            <select name="semester" class="input-field">
+              <option value="">جميع الفصول</option>
+              <option value="الفصل الأول" <%= filters.semester === 'الفصل الأول' ? 'selected' : '' %>>الفصل الأول</option>
+              <option value="الفصل الثاني" <%= filters.semester === 'الفصل الثاني' ? 'selected' : '' %>>الفصل الثاني</option>
+              <option value="الفصل الثالث" <%= filters.semester === 'الفصل الثالث' ? 'selected' : '' %>>الفصل الثالث</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">المعلم</label>
+            <select name="teacherId" class="input-field">
+              <option value="">جميع المعلمين</option>
+              <% teachers.forEach(teacher => { %>
+                <option value="<%= teacher.id %>" <%= filters.teacherId == teacher.id ? 'selected' : '' %>>
+                  <%= teacher.firstName %> <%= teacher.lastName %>
+                </option>
+              <% }); %>
+            </select>
+          </div>
+          
+          <div class="md:col-span-2 lg:col-span-4 flex gap-3">
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-search ml-2"></i>
+              بحث
+            </button>
+            <a href="/admin/grades" class="btn-secondary">
+              <i class="fas fa-redo ml-2"></i>
+              إعادة تعيين
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- جدول النتائج -->
+      <div class="card">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-2xl font-bold text-gray-800">النتائج</h2>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <% if (grades.length === 0) { %>
+            <div class="p-8 text-center text-gray-500">
+              <i class="fas fa-clipboard text-6xl mb-4 text-gray-300"></i>
+              <p class="text-xl">لا توجد نتائج تطابق معايير البحث</p>
+            </div>
+          <% } else { %>
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">التلميذ</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">القسم</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">المعلم</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">المادة</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">النوع</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">العلامة</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">الفصل</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">الحالة</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <% grades.forEach(grade => { %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                      <div class="font-semibold text-gray-800">
+                        <%= grade.studentFirstName %> <%= grade.studentLastName %>
+                      </div>
+                      <a href="/admin/grades/student/<%= grade.studentId %>" 
+                         class="text-sm text-primary-600 hover:underline">
+                        <i class="fas fa-chart-line ml-1"></i>
+                        عرض كل النتائج
+                      </a>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600"><%= grade.studentClass %></td>
+                    <td class="px-6 py-4 text-gray-600">
+                      <%= grade.teacherFirstName %> <%= grade.teacherLastName %>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600"><%= grade.subject %></td>
+                    <td class="px-6 py-4">
+                      <% if (grade.gradeType === 'فرض عادي') { %>
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">فرض عادي</span>
+                      <% } else if (grade.gradeType === 'فرض تأليفي') { %>
+                        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">فرض تأليفي</span>
+                      <% } else { %>
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">شفاهي</span>
+                      <% } %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="font-bold text-lg <%= grade.gradeValue >= 10 ? 'text-green-600' : 'text-red-600' %>">
+                        <%= grade.gradeValue %> / <%= grade.maxGrade %>
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600"><%= grade.semester %></td>
+                    <td class="px-6 py-4">
+                      <% if (grade.isPublished) { %>
+                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                          <i class="fas fa-eye ml-1"></i> منشور
+                        </span>
+                      <% } else { %>
+                        <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">
+                          <i class="fas fa-eye-slash ml-1"></i> غير منشور
+                        </span>
+                      <% } %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <form action="/admin/grades/delete/<%= grade.id %>" method="POST" class="inline" 
+                            onsubmit="return confirm('هل أنت متأكد من حذف هذه النتيجة؟')">
+                        <button type="submit" class="text-red-600 hover:text-red-800" title="حذف">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

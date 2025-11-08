@@ -73,10 +73,10 @@
               <div class="mb-6">
                 <label class="block text-gray-700 font-semibold mb-2" for="classLevel">
                   <i class="fas fa-graduation-cap ml-2"></i>
-                  السنة الدراسية
+                  القسم (المستوى الدراسي)
                 </label>
                 <select id="classLevel" name="classLevel" class="input-field">
-                  <option value="">اختر السنة</option>
+                  <option value="">اختر القسم</option>
                   <option value="السابعة أساسي">السابعة أساسي</option>
                   <option value="الثامنة أساسي">الثامنة أساسي</option>
                   <option value="التاسعة أساسي">التاسعة أساسي</option>
@@ -84,17 +84,23 @@
               </div>
               
               <div class="mb-6">
-                <label class="block text-gray-700 font-semibold mb-2" for="section">
+                <label class="block text-gray-700 font-semibold mb-2" for="classNumber">
                   <i class="fas fa-users ml-2"></i>
-                  القسم
+                  رقم الصف
                 </label>
-                <input 
-                  type="text" 
-                  id="section" 
-                  name="section" 
-                  class="input-field"
-                  placeholder="مثال: 1"
-                >
+                <select id="classNumber" name="classNumber" class="input-field">
+                  <option value="">اختر رقم الصف</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                </select>
               </div>
             </div>
             
@@ -112,6 +118,39 @@
                   class="input-field"
                   placeholder="مثال: الرياضيات"
                 >
+              </div>
+            </div>
+            
+            <!-- حقول خاصة بولي الأمر -->
+            <div id="parent-fields" class="hidden">
+              <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2" for="childFirstName">
+                  <i class="fas fa-user-graduate ml-2"></i>
+                  الاسم الأول للابن
+                </label>
+                <input 
+                  type="text" 
+                  id="childFirstName" 
+                  name="childFirstName" 
+                  class="input-field"
+                  placeholder="الاسم الأول"
+                >
+                <p class="text-xs text-gray-500 mt-1">يجب أن يطابق الاسم المسجل في النظام</p>
+              </div>
+              
+              <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2" for="childLastName">
+                  <i class="fas fa-user-graduate ml-2"></i>
+                  اللقب للابن
+                </label>
+                <input 
+                  type="text" 
+                  id="childLastName" 
+                  name="childLastName" 
+                  class="input-field"
+                  placeholder="اللقب"
+                >
+                <p class="text-xs text-gray-500 mt-1">يجب أن يطابق اللقب المسجل في النظام</p>
               </div>
             </div>
             
@@ -169,14 +208,18 @@
       const role = document.getElementById('role').value;
       const studentFields = document.getElementById('student-fields');
       const teacherFields = document.getElementById('teacher-fields');
+      const parentFields = document.getElementById('parent-fields');
       
       studentFields.classList.add('hidden');
       teacherFields.classList.add('hidden');
+      parentFields.classList.add('hidden');
       
       if (role === 'student') {
         studentFields.classList.remove('hidden');
       } else if (role === 'teacher') {
         teacherFields.classList.remove('hidden');
+      } else if (role === 'parent') {
+        parentFields.classList.remove('hidden');
       }
     }
     

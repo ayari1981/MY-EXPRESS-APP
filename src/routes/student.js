@@ -7,7 +7,7 @@ const Lesson = require('../models/Lesson');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
-const { Schedule } = require('../models');
+const { Schedule, Grade } = require('../models');
 const { Op } = require('sequelize');
 
 // لوحة تحكم التلميذ
@@ -375,6 +375,81 @@ router.get('/schedules/download/:id', ensureStudent, async (req, res) => {
     console.error(err);
     req.flash('error_msg', 'حدث خطأ');
     res.redirect('/student/schedules');
+  }
+});
+
+// عرض النتائج
+router.get('/grades', ensureStudent, async (req, res) => {
+  try {
+    const { semester } = req.query;
+    
+    const whereClause = {
+      studentId: req.user.id,
+      isPublished: true
+    };
+    
+    if (semester) whereClause.semester = semester;
+    
+    const grades = await Grade.findAll({
+      where: whereClause,
+      include: [{
+        model: User,
+        as: 'teacher',
+        attributes: ['id', 'name']
+      }],
+      order: [['semester', 'ASC'], ['subject', 'ASC'], ['created_at', 'DESC']]
+    });
+    
+    // حساب المعدلات
+    const gradesBySubject = {};
+    const gradesBySemester = {};
+    
+    grades.forEach(grade => {
+      // حسب المادة
+      if (!gradesBySubject[grade.subject]) {
+        gradesBySubject[grade.subject] = [];
+      }
+      gradesBySubject[grade.subject].push(grade);
+      
+      // حسب الفصل
+      if (!gradesBySemester[grade.semester]) {
+        gradesBySemester[grade.semester] = [];
+      }
+      gradesBySemester[grade.semester].push(grade);
+    });
+    
+    // حساب المعدل لكل مادة
+    const averages = {};
+    for (const [subject, subjectGrades] of Object.entries(gradesBySubject)) {
+      const total = subjectGrades.reduce((sum, g) => sum + parseFloat(g.gradeValue), 0);
+      averages[subject] = (total / subjectGrades.length).toFixed(2);
+    }
+    
+    // حساب المعدل العام
+    let generalAverage = 0;
+    if (grades.length > 0) {
+      const total = grades.reduce((sum, g) => sum + parseFloat(g.gradeValue), 0);
+      generalAverage = (total / grades.length).toFixed(2);
+    }
+    
+    res.render('student/grades', {
+      title: 'نتائجي',
+      user: req.user,
+      grades,
+      averages,
+      generalAverage,
+      gradesBySubject,
+      gradesBySemester,
+      academicYear: '2024-2025',
+      selectedSemester: semester || '',
+      totalGrades: grades.length,
+      subjectAverages: averages,
+      overallAverage: parseFloat(generalAverage)
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/student/dashboard');
   }
 });
 
