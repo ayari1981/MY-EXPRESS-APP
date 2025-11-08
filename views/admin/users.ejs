@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <section class="min-h-screen bg-gray-100 py-8">
+    <div class="container mx-auto px-4">
+      <!-- العنوان -->
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">إدارة المستخدمين</h1>
+        <p class="text-gray-600">عرض وإدارة جميع مستخدمي النظام</p>
+      </div>
+
+      <%- include('../partials/messages') %>
+
+      <!-- فلترة -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <form method="GET" action="/admin/users" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">الدور</label>
+            <select name="role" class="input-field">
+              <option value="">الكل</option>
+              <option value="student" <%= currentRole === 'student' ? 'selected' : '' %>>تلميذ</option>
+              <option value="teacher" <%= currentRole === 'teacher' ? 'selected' : '' %>>معلم</option>
+              <option value="parent" <%= currentRole === 'parent' ? 'selected' : '' %>>ولي أمر</option>
+              <option value="admin" <%= currentRole === 'admin' ? 'selected' : '' %>>مدير</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">البحث</label>
+            <input 
+              type="text" 
+              name="search" 
+              class="input-field" 
+              placeholder="البحث بالاسم أو البريد..."
+              value="<%= searchQuery || '' %>"
+            >
+          </div>
+          
+          <div class="flex items-end">
+            <button type="submit" class="btn-primary w-full">
+              <i class="fas fa-search ml-2"></i>
+              بحث
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- جدول المستخدمين -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">البريد الإلكتروني</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الدور</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">معلومات إضافية</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ التسجيل</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% if (users && users.length > 0) { %>
+                <% users.forEach(u => { %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="font-semibold text-gray-900"><%= u.name %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-gray-600"><%= u.email %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <% if (u.role === 'student') { %>
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                          <i class="fas fa-user-graduate ml-1"></i> تلميذ
+                        </span>
+                      <% } else if (u.role === 'teacher') { %>
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          <i class="fas fa-chalkboard-teacher ml-1"></i> معلم
+                        </span>
+                      <% } else if (u.role === 'parent') { %>
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          <i class="fas fa-users ml-1"></i> ولي أمر
+                        </span>
+                      <% } else if (u.role === 'admin') { %>
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                          <i class="fas fa-user-shield ml-1"></i> مدير
+                        </span>
+                      <% } %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <% if (u.role === 'student' && u.studentClass) { %>
+                        <div class="text-sm text-gray-600">القسم: <%= u.studentClass %></div>
+                      <% } else if (u.role === 'teacher' && u.subject) { %>
+                        <div class="text-sm text-gray-600">المادة: <%= u.subject %></div>
+                      <% } else if (u.role === 'parent' && u.childName) { %>
+                        <div class="text-sm text-gray-600">الابن: <%= u.childName %></div>
+                      <% } else { %>
+                        <div class="text-sm text-gray-400">-</div>
+                      <% } %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <%= new Date(u.created_at).toLocaleDateString('ar-TN') %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                      <% if (u.id !== user.id) { %>
+                        <form method="POST" action="/admin/users/delete/<%= u.id %>" class="inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا المستخدم؟');">
+                          <button type="submit" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i> حذف
+                          </button>
+                        </form>
+                      <% } else { %>
+                        <span class="text-gray-400">أنت</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                    <i class="fas fa-users text-4xl mb-2"></i>
+                    <p>لا يوجد مستخدمون</p>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- إحصائيات سريعة -->
+      <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">ملخص</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600"><%= users.length %></div>
+            <div class="text-sm text-gray-600">إجمالي المستخدمين</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>خطأ - المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  
+  <section class="py-20 min-h-screen flex items-center justify-center bg-gray-50">
+    <div class="text-center max-w-2xl">
+      <div class="text-9xl text-red-600 mb-8">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">حدث خطأ غير متوقع</h1>
+      <p class="text-xl text-gray-600 mb-8">نعتذر عن هذا الإزعاج. يرجى المحاولة مرة أخرى لاحقاً</p>
+      
+      <% if (error && error.message) { %>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-8">
+          <%= error.message %>
+        </div>
+      <% } %>
+      
+      <a href="/" class="btn-primary">
+        <i class="fas fa-home ml-2"></i>
+        العودة للرئيسية
+      </a>
+    </div>
+  </section>
+  
+  <%- include('partials/footer') %>
+</body>
+</html>

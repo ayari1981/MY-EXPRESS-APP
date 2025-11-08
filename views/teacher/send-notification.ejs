@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <section class="min-h-screen bg-gray-100 py-8">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl mx-auto">
+        <!-- العودة -->
+        <div class="mb-6">
+          <a href="/teacher/dashboard" class="text-primary-600 hover:text-primary-800">
+            <i class="fas fa-arrow-right ml-1"></i>
+            العودة للوحة التحكم
+          </a>
+        </div>
+
+        <!-- نموذج الإشعار -->
+        <div class="bg-white rounded-lg shadow-md p-8">
+          <h2 class="text-3xl font-bold text-gray-800 mb-2">
+            <i class="fas fa-bell ml-2 text-primary-600"></i>
+            إرسال إشعار للتلاميذ
+          </h2>
+          <p class="text-gray-600 mb-8">
+            أرسل إشعاراً مهماً لجميع تلاميذ القسم المحدد
+          </p>
+
+          <%- include('../partials/messages') %>
+
+          <form action="/teacher/send-notification" method="POST" id="notificationForm">
+            <!-- نوع الإرسال -->
+            <div class="mb-6">
+              <label class="block text-gray-700 font-semibold mb-3">
+                <i class="fas fa-paper-plane ml-2"></i>
+                نوع الإرسال *
+              </label>
+              <div class="space-y-3">
+                <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 transition-colors">
+                  <input type="radio" name="notificationType" value="class" class="ml-3 w-5 h-5 text-primary-600" checked onchange="toggleNotificationType()">
+                  <div>
+                    <div class="font-semibold text-gray-800">
+                      <i class="fas fa-users ml-1 text-primary-600"></i>
+                      إرسال لقسم كامل
+                    </div>
+                    <div class="text-sm text-gray-600">إرسال الإشعار لجميع تلاميذ قسم معين</div>
+                  </div>
+                </label>
+                
+                <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 transition-colors">
+                  <input type="radio" name="notificationType" value="specific" class="ml-3 w-5 h-5 text-primary-600" onchange="toggleNotificationType()">
+                  <div>
+                    <div class="font-semibold text-gray-800">
+                      <i class="fas fa-user ml-1 text-blue-600"></i>
+                      إرسال لتلميذ معين
+                    </div>
+                    <div class="text-sm text-gray-600">إرسال الإشعار لتلميذ واحد فقط</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- القسم المستهدف (للإرسال الجماعي) -->
+            <div class="mb-6" id="classSelection">
+              <label class="block text-gray-700 font-semibold mb-2" for="targetClass">
+                <i class="fas fa-graduation-cap ml-2"></i>
+                القسم المستهدف *
+              </label>
+              <select id="targetClass" name="targetClass" class="input-field">
+                <option value="">اختر القسم</option>
+                <option value="السابعة أساسي">السابعة أساسي</option>
+                <option value="الثامنة أساسي">الثامنة أساسي</option>
+                <option value="التاسعة أساسي">التاسعة أساسي</option>
+              </select>
+              <p class="text-sm text-gray-500 mt-1">
+                سيتم إرسال الإشعار لجميع تلاميذ القسم المحدد
+              </p>
+            </div>
+
+            <!-- التلميذ المحدد (للإرسال الفردي) -->
+            <div class="mb-6 hidden" id="studentSelection">
+              <label class="block text-gray-700 font-semibold mb-2" for="specificStudent">
+                <i class="fas fa-user-graduate ml-2"></i>
+                اختر التلميذ *
+              </label>
+              <select id="specificStudent" name="specificStudent" class="input-field">
+                <option value="">اختر التلميذ</option>
+                <% 
+                let currentClass = '';
+                students.forEach(student => { 
+                  if (currentClass !== student.studentClass) {
+                    if (currentClass !== '') { %>
+                      </optgroup>
+                    <% }
+                    currentClass = student.studentClass;
+                  %>
+                    <optgroup label="<%= student.studentClass %>">
+                  <% } %>
+                    <option value="<%= student.id %>"><%= student.name %> (<%= student.studentClass %>)</option>
+                <% }); 
+                if (currentClass !== '') { %>
+                  </optgroup>
+                <% } %>
+              </select>
+              <p class="text-sm text-gray-500 mt-1">
+                اختر تلميذاً واحداً لإرسال الإشعار له
+              </p>
+            </div>
+
+            <!-- عنوان الإشعار -->
+            <div class="mb-6">
+              <label class="block text-gray-700 font-semibold mb-2" for="title">
+                <i class="fas fa-heading ml-2"></i>
+                عنوان الإشعار *
+              </label>
+              <input 
+                type="text" 
+                id="title" 
+                name="title" 
+                class="input-field"
+                required
+                placeholder="مثال: إشعار مهم، درس جديد، تذكير بالواجب..."
+                maxlength="100"
+              >
+            </div>
+
+            <!-- نص الإشعار -->
+            <div class="mb-6">
+              <label class="block text-gray-700 font-semibold mb-2" for="message">
+                <i class="fas fa-comment-dots ml-2"></i>
+                نص الإشعار *
+              </label>
+              <textarea 
+                id="message" 
+                name="message" 
+                class="input-field"
+                rows="6"
+                required
+                placeholder="اكتب نص الإشعار هنا..."
+                maxlength="500"
+              ></textarea>
+              <p class="text-sm text-gray-500 mt-1">
+                الحد الأقصى: 500 حرف
+              </p>
+            </div>
+
+            <!-- معاينة -->
+            <div class="bg-blue-50 border-r-4 border-blue-500 rounded-lg p-4 mb-6">
+              <h4 class="font-semibold text-blue-800 mb-2">
+                <i class="fas fa-info-circle ml-1"></i>
+                معاينة الإشعار
+              </h4>
+              <div class="bg-white rounded-lg p-4 mt-3">
+                <div class="flex items-start space-x-reverse space-x-3">
+                  <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                      <i class="fas fa-bell text-primary-600"></i>
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-bold text-gray-800 mb-1" id="preview-title">عنوان الإشعار</h5>
+                    <p class="text-gray-600 text-sm" id="preview-message">نص الإشعار سيظهر هنا...</p>
+                    <p class="text-xs text-gray-400 mt-2">
+                      <i class="fas fa-user ml-1"></i>
+                      من: <%= user.name %> (معلم <%= user.subject || '' %>)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ملاحظات هامة -->
+            <div class="bg-yellow-50 border-r-4 border-yellow-500 rounded-lg p-4 mb-6">
+              <h4 class="font-semibold text-yellow-800 mb-2">
+                <i class="fas fa-exclamation-triangle ml-1"></i>
+                ملاحظات هامة
+              </h4>
+              <ul class="text-sm text-gray-700 space-y-1" id="importantNotes">
+                <li class="class-note"><i class="fas fa-check text-green-500 ml-1"></i> تأكد من اختيار القسم الصحيح</li>
+                <li class="class-note"><i class="fas fa-check text-green-500 ml-1"></i> سيصل الإشعار لجميع تلاميذ القسم فوراً</li>
+                <li class="student-note hidden"><i class="fas fa-check text-green-500 ml-1"></i> تأكد من اختيار التلميذ الصحيح</li>
+                <li class="student-note hidden"><i class="fas fa-check text-green-500 ml-1"></i> سيصل الإشعار للتلميذ المحدد فقط</li>
+                <li><i class="fas fa-check text-green-500 ml-1"></i> يمكن للتلاميذ مشاهدة الإشعار في صفحة الإشعارات</li>
+                <li><i class="fas fa-check text-green-500 ml-1"></i> تأكد من وضوح ودقة نص الإشعار</li>
+              </ul>
+            </div>
+
+            <!-- أزرار الإجراء -->
+            <div class="flex justify-end space-x-reverse space-x-4">
+              <a href="/teacher/dashboard" class="btn-secondary">
+                إلغاء
+              </a>
+              <button type="submit" class="btn-primary">
+                <i class="fas fa-paper-plane ml-2"></i>
+                إرسال الإشعار
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- نصائح -->
+        <div class="bg-green-50 rounded-lg p-6 mt-6">
+          <h3 class="font-bold text-green-800 mb-3">
+            <i class="fas fa-lightbulb ml-2"></i>
+            نصائح لإرسال إشعارات فعّالة
+          </h3>
+          <ul class="space-y-2 text-gray-700">
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-green-500 ml-2 mt-1"></i>
+              <span>استخدم عناوين واضحة ومختصرة</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-green-500 ml-2 mt-1"></i>
+              <span>اكتب نصاً مباشراً وسهل الفهم</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-green-500 ml-2 mt-1"></i>
+              <span>حدد تاريخ أو موعد إذا كان الإشعار عن حدث معين</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-green-500 ml-2 mt-1"></i>
+              <span>تجنب إرسال إشعارات غير ضرورية</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    // معاينة مباشرة للإشعار
+    document.getElementById('title').addEventListener('input', function(e) {
+      document.getElementById('preview-title').textContent = e.target.value || 'عنوان الإشعار';
+    });
+
+    document.getElementById('message').addEventListener('input', function(e) {
+      document.getElementById('preview-message').textContent = e.target.value || 'نص الإشعار سيظهر هنا...';
+    });
+
+    // تبديل نوع الإرسال
+    function toggleNotificationType() {
+      const notificationType = document.querySelector('input[name="notificationType"]:checked').value;
+      const classSelection = document.getElementById('classSelection');
+      const studentSelection = document.getElementById('studentSelection');
+      const targetClass = document.getElementById('targetClass');
+      const specificStudent = document.getElementById('specificStudent');
+      const classNotes = document.querySelectorAll('.class-note');
+      const studentNotes = document.querySelectorAll('.student-note');
+      
+      if (notificationType === 'class') {
+        classSelection.classList.remove('hidden');
+        studentSelection.classList.add('hidden');
+        targetClass.required = true;
+        specificStudent.required = false;
+        specificStudent.value = '';
+        classNotes.forEach(note => note.classList.remove('hidden'));
+        studentNotes.forEach(note => note.classList.add('hidden'));
+      } else {
+        classSelection.classList.add('hidden');
+        studentSelection.classList.remove('hidden');
+        targetClass.required = false;
+        specificStudent.required = true;
+        targetClass.value = '';
+        classNotes.forEach(note => note.classList.add('hidden'));
+        studentNotes.forEach(note => note.classList.remove('hidden'));
+      }
+    }
+
+    // تشغيل عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+      toggleNotificationType();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <section class="min-h-screen bg-gray-100 py-8">
+    <div class="container mx-auto px-4">
+      <!-- العنوان -->
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">إدارة التعليقات</h1>
+        <p class="text-gray-600">مراجعة والموافقة على التعليقات المعلقة</p>
+      </div>
+
+      <%- include('../partials/messages') %>
+
+      <!-- التعليقات المعلقة -->
+      <div class="space-y-4">
+        <% if (comments && comments.length > 0) { %>
+          <% comments.forEach(comment => { %>
+            <div class="bg-white rounded-lg shadow-md p-6">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h3 class="font-bold text-gray-800 text-lg mb-1">
+                    <%= comment.user ? comment.user.name : 'مستخدم محذوف' %>
+                  </h3>
+                  <p class="text-sm text-gray-500">
+                    <i class="fas fa-book ml-1"></i>
+                    الدرس: <%= comment.lesson ? comment.lesson.title : 'درس محذوف' %>
+                  </p>
+                  <p class="text-xs text-gray-400 mt-1">
+                    <i class="fas fa-clock ml-1"></i>
+                    <%= new Date(comment.created_at).toLocaleDateString('ar-TN') %>
+                  </p>
+                </div>
+                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
+                  معلق
+                </span>
+              </div>
+
+              <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <p class="text-gray-700"><%= comment.content %></p>
+              </div>
+
+              <div class="flex gap-2">
+                <form method="POST" action="/admin/comments/approve/<%= comment.id %>" class="inline">
+                  <button type="submit" class="btn-primary">
+                    <i class="fas fa-check ml-2"></i>
+                    موافقة
+                  </button>
+                </form>
+
+                <form method="POST" action="/admin/comments/delete/<%= comment.id %>" class="inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا التعليق؟');">
+                  <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-lg transition-all">
+                    <i class="fas fa-trash ml-2"></i>
+                    حذف
+                  </button>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="bg-white rounded-lg shadow-md p-12 text-center">
+            <i class="fas fa-comments text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد تعليقات معلقة</h3>
+            <p class="text-gray-500">جميع التعليقات تمت مراجعتها</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

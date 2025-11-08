@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعليمات التشغيل - المدرسة الإعدادية أبو القاسم الشابي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .alert {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-right: 5px solid #667eea;
+        }
+        .step h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        .step p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .step ul {
+            margin-right: 20px;
+            margin-top: 10px;
+        }
+        .step li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        code {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        .download-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+        .success {
+            background: #48bb78;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        .check {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-right: 3px solid #48bb78;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 تعليمات تشغيل التطبيق</h1>
+        
+        <div class="alert">
+            ⚠️ التطبيق لا يعمل لأن MySQL غير مثبت على جهازك!
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">1</span>
+                تحميل وتثبيت XAMPP
+            </h2>
+            <p><strong>XAMPP هو أسهل طريقة لتشغيل MySQL</strong></p>
+            <ul>
+                <li>اذهب إلى الرابط: <code>https://www.apachefriends.org</code></li>
+                <li>اضغط على "Download" لنظام Windows</li>
+                <li>شغّل الملف المحمّل وأكمل التثبيت</li>
+                <li>اختر تثبيت: Apache, MySQL, phpMyAdmin</li>
+            </ul>
+            <a href="https://www.apachefriends.org/download.html" target="_blank" class="download-btn">
+                📥 تحميل XAMPP
+            </a>
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">2</span>
+                تشغيل MySQL من XAMPP
+            </h2>
+            <p>بعد تثبيت XAMPP:</p>
+            <ul>
+                <li>افتح <strong>XAMPP Control Panel</strong> من قائمة Start</li>
+                <li>اضغط زر <strong>"Start"</strong> بجانب <strong>MySQL</strong></li>
+                <li>انتظر حتى يتحول اللون إلى أخضر</li>
+                <li>(اختياري) اضغط Start بجانب Apache أيضاً</li>
+            </ul>
+            <div class="check">
+                ✅ يجب أن ترى "MySQL" باللون الأخضر وPort 3306
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">3</span>
+                إنشاء قاعدة البيانات
+            </h2>
+            <p>افتح phpMyAdmin:</p>
+            <ul>
+                <li>افتح المتصفح واذهب إلى: <code>http://localhost/phpmyadmin</code></li>
+                <li>اضغط على "New" أو "قاعدة بيانات جديدة" من القائمة اليسرى</li>
+                <li>اكتب اسم قاعدة البيانات: <code>ecole_chebbi</code></li>
+                <li>اختر Collation: <code>utf8mb4_unicode_ci</code></li>
+                <li>اضغط "Create" أو "إنشاء"</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">4</span>
+                تحديث إعدادات التطبيق
+            </h2>
+            <p>افتح ملف <code>.env</code> في مجلد المشروع وغيّر:</p>
+            <p><strong>من:</strong></p>
+            <code>DB_PASSWORD=loi123</code>
+            <p style="margin-top: 10px;"><strong>إلى:</strong></p>
+            <code>DB_PASSWORD=</code>
+            <p style="margin-top: 10px; color: #e53e3e; font-weight: bold;">
+                ⚠️ اترك كلمة المرور فارغة في XAMPP (بدون كلمة مرور)
+            </p>
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">5</span>
+                تشغيل التطبيق
+            </h2>
+            <p>افتح Terminal (PowerShell) في مجلد المشروع واكتب:</p>
+            <code>npm start</code>
+            <div class="check" style="margin-top: 15px;">
+                <strong>يجب أن ترى:</strong><br>
+                ✅ MySQL متصل بنجاح<br>
+                📊 قاعدة البيانات: ecole_chebbi<br>
+                ✅ تم مزامنة النماذج<br>
+                🚀 الخادم يعمل على http://localhost:3000
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">6</span>
+                إنشاء حساب تلميذ للتجربة
+            </h2>
+            <p>افتح المتصفح واذهب إلى:</p>
+            <code>http://localhost:3000/auth/register</code>
+            <p style="margin-top: 15px;">املأ البيانات:</p>
+            <ul>
+                <li><strong>الاسم:</strong> أحمد التلميذ</li>
+                <li><strong>البريد:</strong> student@test.com</li>
+                <li><strong>كلمة المرور:</strong> 123456</li>
+                <li><strong>تأكيد كلمة المرور:</strong> 123456</li>
+                <li><strong>الدور:</strong> تلميذ (student)</li>
+                <li><strong>القسم:</strong> السنة الثالثة</li>
+                <li><strong>الشعبة:</strong> أ</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h2>
+                <span class="step-number">7</span>
+                الدخول لفضاء التلميذ
+            </h2>
+            <p>بعد التسجيل:</p>
+            <ul>
+                <li>سجل الدخول بالبريد وكلمة المرور</li>
+                <li>ستنتقل تلقائياً إلى لوحة التحكم</li>
+                <li>أو اذهب إلى: <code>http://localhost:3000/student/dashboard</code></li>
+            </ul>
+        </div>
+
+        <div class="success">
+            <h2 style="color: white; margin-bottom: 15px;">🎉 تهانينا!</h2>
+            <p style="font-size: 1.1em;">
+                الآن يمكنك استخدام فضاء التلميذ بكامل ميزاته:<br><br>
+                ✅ عرض الدروس<br>
+                ✅ تحميل الملفات<br>
+                ✅ إضافة التعليقات<br>
+                ✅ متابعة الإشعارات<br>
+            </p>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #edf2f7; border-radius: 10px; text-align: center;">
+            <p style="color: #666; margin-bottom: 10px;">
+                💡 <strong>نصيحة:</strong> في كل مرة تريد استخدام التطبيق:
+            </p>
+            <p style="color: #333;">
+                1. شغّل XAMPP Control Panel<br>
+                2. اضغط Start لـ MySQL<br>
+                3. شغّل التطبيق بـ <code>npm start</code>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

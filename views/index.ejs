@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  
+  <!-- قسم البانر الرئيسي -->
+  <section class="bg-gradient-to-l from-primary-600 to-primary-800 text-white py-20">
+    <div class="container mx-auto px-4 text-center">
+      <h1 class="text-5xl font-bold mb-6 fade-in">
+        المدرسة الإعدادية أبو القاسم الشابي
+      </h1>
+      <p class="text-2xl mb-8 slide-in">
+        ننشئ جيل الغد بالعلم والمعرفة
+      </p>
+      <div class="flex justify-center space-x-reverse space-x-4 fade-in">
+        <% if (!user) { %>
+          <a href="/auth/register" class="bg-white text-primary-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg transition-all shadow-lg">
+            ابدأ الآن
+          </a>
+          <a href="/auth/login" class="border-2 border-white text-white hover:bg-white hover:text-primary-600 font-bold py-3 px-8 rounded-lg transition-all">
+            تسجيل الدخول
+          </a>
+        <% } else { %>
+          <a href="/dashboard" class="bg-white text-primary-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg transition-all shadow-lg">
+            لوحة التحكم
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <!-- فضاءات المدرسة -->
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">فضاءات المدرسة</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- فضاء التلميذ -->
+        <div class="card hover:scale-105 transition-transform cursor-pointer">
+          <div class="p-8 text-center">
+            <div class="text-6xl text-blue-500 mb-4">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">فضاء التلميذ</h3>
+            <p class="text-gray-600 mb-6">
+              تحميل الدروس، جدول الحصص، والتفاعل مع المحتوى التعليمي
+            </p>
+            <a href="/auth/login" class="btn-primary inline-block">
+              الدخول
+            </a>
+          </div>
+        </div>
+
+        <!-- فضاء المدرس -->
+        <div class="card hover:scale-105 transition-transform cursor-pointer">
+          <div class="p-8 text-center">
+            <div class="text-6xl text-green-500 mb-4">
+              <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">فضاء المدرس</h3>
+            <p class="text-gray-600 mb-6">
+              رفع الدروس، إدارة المحتوى، ومتابعة أداء التلاميذ
+            </p>
+            <a href="/auth/login" class="btn-primary inline-block">
+              الدخول
+            </a>
+          </div>
+        </div>
+
+        <!-- فضاء الولي -->
+        <div class="card hover:scale-105 transition-transform cursor-pointer">
+          <div class="p-8 text-center">
+            <div class="text-6xl text-purple-500 mb-4">
+              <i class="fas fa-users"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">فضاء الولي</h3>
+            <p class="text-gray-600 mb-6">
+              متابعة الأبناء، تقديم الملاحظات، والتواصل مع الإدارة
+            </p>
+            <a href="/auth/login" class="btn-primary inline-block">
+              الدخول
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- المميزات -->
+  <section class="py-16">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">لماذا نحن؟</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="text-center p-6">
+          <div class="text-5xl text-primary-600 mb-4">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">مكتبة رقمية شاملة</h3>
+          <p class="text-gray-600">جميع الدروس والموارد التعليمية في مكان واحد</p>
+        </div>
+        
+        <div class="text-center p-6">
+          <div class="text-5xl text-primary-600 mb-4">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">جدول حصص تفاعلي</h3>
+          <p class="text-gray-600">تنظيم أفضل للوقت والدراسة</p>
+        </div>
+        
+        <div class="text-center p-6">
+          <div class="text-5xl text-primary-600 mb-4">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">تواصل فعّال</h3>
+          <p class="text-gray-600">تواصل مباشر بين الإدارة والأولياء والتلاميذ</p>
+        </div>
+        
+        <div class="text-center p-6">
+          <div class="text-5xl text-primary-600 mb-4">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">أمان وخصوصية</h3>
+          <p class="text-gray-600">حماية كاملة لبيانات المستخدمين</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+  
+  <script src="/js/main.js"></script>
+</body>
+</html>

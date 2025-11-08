@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <section class="py-8 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+          <i class="fas fa-clipboard-list ml-2 text-primary-600"></i>
+          سجلات النظام
+        </h1>
+        <p class="text-gray-600">تتبع جميع الأنشطة والإجراءات في النظام</p>
+      </div>
+      
+      <%- include('../partials/messages') %>
+      
+      <!-- الفلاتر والبحث -->
+      <div class="card mb-6 p-6">
+        <form method="GET" action="/logs" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">الإجراء</label>
+            <select name="action" class="input-field">
+              <option value="">الكل</option>
+              <option value="login" <%= filters.action === 'login' ? 'selected' : '' %>>تسجيل دخول</option>
+              <option value="logout" <%= filters.action === 'logout' ? 'selected' : '' %>>تسجيل خروج</option>
+              <option value="create_user" <%= filters.action === 'create_user' ? 'selected' : '' %>>إنشاء مستخدم</option>
+              <option value="delete_user" <%= filters.action === 'delete_user' ? 'selected' : '' %>>حذف مستخدم</option>
+              <option value="approve_comment" <%= filters.action === 'approve_comment' ? 'selected' : '' %>>موافقة تعليق</option>
+              <option value="upload_lesson" <%= filters.action === 'upload_lesson' ? 'selected' : '' %>>رفع درس</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">المستخدم</label>
+            <select name="userId" class="input-field">
+              <option value="">الكل</option>
+              <% users.forEach(u => { %>
+                <option value="<%= u.id %>" <%= filters.userId == u.id ? 'selected' : '' %>>
+                  <%= u.name %>
+                </option>
+              <% }); %>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">من تاريخ</label>
+            <input type="date" name="startDate" class="input-field" value="<%= filters.startDate || '' %>">
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">إلى تاريخ</label>
+            <input type="date" name="endDate" class="input-field" value="<%= filters.endDate || '' %>">
+          </div>
+          
+          <div class="md:col-span-4 flex space-x-reverse space-x-4">
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-search ml-2"></i>
+              بحث
+            </button>
+            <a href="/logs" class="btn-secondary">
+              <i class="fas fa-redo ml-2"></i>
+              إعادة تعيين
+            </a>
+            <a href="/logs/export/csv" class="btn-secondary">
+              <i class="fas fa-download ml-2"></i>
+              تصدير CSV
+            </a>
+          </div>
+        </form>
+      </div>
+      
+      <!-- إحصائيات -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="card p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 mb-1">إجمالي السجلات</p>
+              <p class="text-4xl font-bold text-primary-600"><%= totalLogs %></p>
+            </div>
+            <div class="text-5xl text-primary-200">
+              <i class="fas fa-list"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 mb-1">الصفحة الحالية</p>
+              <p class="text-4xl font-bold text-green-600"><%= currentPage %></p>
+            </div>
+            <div class="text-5xl text-green-200">
+              <i class="fas fa-file"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 mb-1">إجمالي الصفحات</p>
+              <p class="text-4xl font-bold text-blue-600"><%= totalPages %></p>
+            </div>
+            <div class="text-5xl text-blue-200">
+              <i class="fas fa-copy"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- جدول السجلات -->
+      <div class="card">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+          <h2 class="text-2xl font-bold text-gray-800">السجلات</h2>
+          
+          <!-- نموذج حذف السجلات القديمة -->
+          <form action="/logs/cleanup" method="POST" class="flex items-center space-x-reverse space-x-2" onsubmit="return confirm('هل أنت متأكد من حذف السجلات القديمة؟')">
+            <select name="days" class="input-field w-32">
+              <option value="30">30 يوم</option>
+              <option value="60">60 يوم</option>
+              <option value="90">90 يوم</option>
+              <option value="180">180 يوم</option>
+            </select>
+            <button type="submit" class="btn-secondary">
+              <i class="fas fa-trash ml-2"></i>
+              حذف القديم
+            </button>
+          </form>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <% if (logs.length === 0) { %>
+            <div class="p-8 text-center text-gray-500">
+              <i class="fas fa-inbox text-6xl mb-4 text-gray-300"></i>
+              <p class="text-xl">لا توجد سجلات</p>
+            </div>
+          <% } else { %>
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">التاريخ والوقت</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">المستخدم</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">الإجراء</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">الوصف</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">عنوان IP</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">التفاصيل</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <% logs.forEach(log => { %>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                      <%= new Date(log.created_at).toLocaleString('ar-TN') %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <% if (log.user) { %>
+                        <div class="font-semibold text-gray-800"><%= log.user.name %></div>
+                        <div class="text-sm text-gray-500"><%= log.user.email %></div>
+                      <% } else { %>
+                        <span class="text-gray-400">غير معروف</span>
+                      <% } %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-semibold">
+                        <%= log.action %>
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">
+                      <%= log.description.substring(0, 80) %><%= log.description.length > 80 ? '...' : '' %>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                      <%= log.ipAddress || '-' %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <a href="/logs/<%= log.id %>" class="text-primary-600 hover:text-primary-800">
+                        <i class="fas fa-eye"></i>
+                        عرض
+                      </a>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          <% } %>
+        </div>
+        
+        <!-- الترقيم -->
+        <% if (totalPages > 1) { %>
+          <div class="p-6 border-t border-gray-200">
+            <div class="flex justify-center space-x-reverse space-x-2">
+              <% if (currentPage > 1) { %>
+                <a href="?page=<%= currentPage - 1 %><%= filters.action ? '&action=' + filters.action : '' %><%= filters.userId ? '&userId=' + filters.userId : '' %>" class="btn-secondary">
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              <% } %>
+              
+              <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                <a href="?page=<%= i %><%= filters.action ? '&action=' + filters.action : '' %><%= filters.userId ? '&userId=' + filters.userId : '' %>" 
+                   class="<%= i === currentPage ? 'btn-primary' : 'btn-secondary' %>">
+                  <%= i %>
+                </a>
+              <% } %>
+              
+              <% if (currentPage < totalPages) { %>
+                <a href="?page=<%= currentPage + 1 %><%= filters.action ? '&action=' + filters.action : '' %><%= filters.userId ? '&userId=' + filters.userId : '' %>" class="btn-secondary">
+                  <i class="fas fa-chevron-left"></i>
+                </a>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+  
+  <%- include('../partials/footer') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>

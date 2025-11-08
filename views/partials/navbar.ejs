@@ -1,0 +1,51 @@
+<nav class="bg-white shadow-lg sticky top-0 z-50">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-between items-center py-4">
+      <!-- الشعار -->
+      <div class="flex items-center space-x-reverse space-x-4">
+        <div class="text-2xl font-bold text-primary-600">
+          <i class="fas fa-graduation-cap ml-2"></i>
+          المدرسة الإعدادية أبو القاسم الشابي
+        </div>
+      </div>
+      
+      <!-- القائمة -->
+      <div class="hidden md:flex items-center space-x-reverse space-x-6">
+        <a href="/" class="text-gray-700 hover:text-primary-600 transition-colors">الرئيسية</a>
+        <a href="/about" class="text-gray-700 hover:text-primary-600 transition-colors">من نحن</a>
+        <a href="/contact" class="text-gray-700 hover:text-primary-600 transition-colors">اتصل بنا</a>
+        
+        <% if (user) { %>
+          <a href="/dashboard" class="text-gray-700 hover:text-primary-600 transition-colors">
+            <i class="fas fa-user-circle ml-1"></i>
+            <%= user.name %>
+          </a>
+          <a href="/auth/logout" class="btn-primary">تسجيل الخروج</a>
+        <% } else { %>
+          <a href="/auth/login" class="text-gray-700 hover:text-primary-600 transition-colors">تسجيل الدخول</a>
+          <a href="/auth/register" class="btn-primary">إنشاء حساب</a>
+        <% } %>
+      </div>
+      
+      <!-- زر القائمة للهاتف -->
+      <button class="md:hidden text-gray-700" id="mobile-menu-btn">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+    </div>
+    
+    <!-- القائمة للهاتف -->
+    <div class="hidden md:hidden pb-4" id="mobile-menu">
+      <a href="/" class="block py-2 text-gray-700 hover:text-primary-600">الرئيسية</a>
+      <a href="/about" class="block py-2 text-gray-700 hover:text-primary-600">من نحن</a>
+      <a href="/contact" class="block py-2 text-gray-700 hover:text-primary-600">اتصل بنا</a>
+      
+      <% if (user) { %>
+        <a href="/dashboard" class="block py-2 text-gray-700 hover:text-primary-600"><%= user.name %></a>
+        <a href="/auth/logout" class="block py-2 text-red-600 hover:text-red-800">تسجيل الخروج</a>
+      <% } else { %>
+        <a href="/auth/login" class="block py-2 text-gray-700 hover:text-primary-600">تسجيل الدخول</a>
+        <a href="/auth/register" class="block py-2 text-primary-600 hover:text-primary-800">إنشاء حساب</a>
+      <% } %>
+    </div>
+  </div>
+</nav>

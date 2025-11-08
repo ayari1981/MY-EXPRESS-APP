@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <section class="min-h-screen bg-gray-100 py-8">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl mx-auto">
+        <!-- العودة -->
+        <div class="mb-6">
+          <a href="/student/dashboard" class="text-primary-600 hover:text-primary-800">
+            <i class="fas fa-arrow-right ml-1"></i>
+            العودة للوحة التحكم
+          </a>
+        </div>
+
+        <!-- بطاقة المعلومات الشخصية -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <!-- الرأس -->
+          <div class="bg-gradient-to-r from-primary-500 to-primary-600 p-8 text-white">
+            <div class="flex items-center space-x-reverse space-x-4">
+              <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-primary-600">
+                <i class="fas fa-user-graduate text-5xl"></i>
+              </div>
+              <div>
+                <h1 class="text-3xl font-bold mb-1"><%= user.name %></h1>
+                <p class="text-primary-100">
+                  <i class="fas fa-graduation-cap ml-1"></i>
+                  تلميذ - <%= user.studentClass || 'غير محدد' %>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- المحتوى -->
+          <div class="p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+              <i class="fas fa-edit ml-2"></i>
+              تعديل البيانات الشخصية
+            </h2>
+
+            <%- include('../partials/messages') %>
+
+            <form action="/student/profile" method="POST">
+              <div class="space-y-6">
+                <!-- الاسم الكامل -->
+                <div>
+                  <label class="block text-gray-700 font-semibold mb-2" for="name">
+                    <i class="fas fa-user ml-2"></i>
+                    الاسم الكامل *
+                  </label>
+                  <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    class="input-field"
+                    required
+                    value="<%= user.name %>"
+                  >
+                </div>
+
+                <!-- البريد الإلكتروني -->
+                <div>
+                  <label class="block text-gray-700 font-semibold mb-2" for="email">
+                    <i class="fas fa-envelope ml-2"></i>
+                    البريد الإلكتروني *
+                  </label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="input-field"
+                    required
+                    value="<%= user.email %>"
+                  >
+                  <p class="text-sm text-gray-500 mt-1">
+                    سيتم استخدام البريد الإلكتروني لتسجيل الدخول
+                  </p>
+                </div>
+
+                <!-- القسم -->
+                <div>
+                  <label class="block text-gray-700 font-semibold mb-2" for="studentClass">
+                    <i class="fas fa-graduation-cap ml-2"></i>
+                    القسم الدراسي *
+                  </label>
+                  <select id="studentClass" name="studentClass" class="input-field" required>
+                    <option value="">اختر القسم</option>
+                    <option value="السابعة أساسي" <%= user.studentClass === 'السابعة أساسي' ? 'selected' : '' %>>السابعة أساسي</option>
+                    <option value="الثامنة أساسي" <%= user.studentClass === 'الثامنة أساسي' ? 'selected' : '' %>>الثامنة أساسي</option>
+                    <option value="التاسعة أساسي" <%= user.studentClass === 'التاسعة أساسي' ? 'selected' : '' %>>التاسعة أساسي</option>
+                  </select>
+                </div>
+
+                <!-- معلومات الحساب -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="font-semibold text-gray-800 mb-3">
+                    <i class="fas fa-info-circle ml-1"></i>
+                    معلومات الحساب
+                  </h3>
+                  <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex justify-between">
+                      <span>الدور:</span>
+                      <span class="font-semibold text-purple-600">تلميذ</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span>تاريخ التسجيل:</span>
+                      <span class="font-semibold"><%= new Date(user.created_at).toLocaleDateString('ar-TN') %></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- أزرار الحفظ -->
+                <div class="flex justify-end space-x-reverse space-x-4 pt-4">
+                  <a href="/student/dashboard" class="btn-secondary">
+                    إلغاء
+                  </a>
+                  <button type="submit" class="btn-primary">
+                    <i class="fas fa-save ml-2"></i>
+                    حفظ التغييرات
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- بطاقة تغيير كلمة المرور -->
+        <div class="bg-white rounded-lg shadow-md mt-6 p-8">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-lock ml-2"></i>
+            تغيير كلمة المرور
+          </h2>
+
+          <div class="bg-blue-50 border-r-4 border-blue-500 rounded-lg p-4">
+            <h4 class="font-semibold text-blue-800 mb-2">
+              <i class="fas fa-info-circle ml-1"></i>
+              ملاحظة
+            </h4>
+            <p class="text-sm text-gray-700">
+              لتغيير كلمة المرور، يرجى التواصل مع إدارة المدرسة أو المدير المسؤول.
+              سيتم إضافة ميزة تغيير كلمة المرور قريباً.
+            </p>
+          </div>
+        </div>
+
+        <!-- نصائح أمان الحساب -->
+        <div class="bg-green-50 rounded-lg p-6 mt-6">
+          <h3 class="font-bold text-green-800 mb-3">
+            <i class="fas fa-shield-alt ml-2"></i>
+            نصائح لحماية حسابك
+          </h3>
+          <ul class="space-y-2 text-gray-700">
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-green-500 ml-2 mt-1"></i>
+              <span>لا تشارك كلمة المرور مع أي شخص</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-green-500 ml-2 mt-1"></i>
+              <span>تأكد من تسجيل الخروج بعد الانتهاء من استخدام الحساب</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-green-500 ml-2 mt-1"></i>
+              <span>استخدم بريد إلكتروني صحيح للتواصل معك عند الحاجة</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

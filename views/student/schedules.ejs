@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link href="/css/output.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <section class="min-h-screen bg-gray-100 py-8">
+    <div class="container mx-auto px-4">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+          <i class="fas fa-calendar-alt ml-2 text-primary-600"></i>
+          الجدول المدرسي وروزنامة الفروض التأليفية
+        </h1>
+        <p class="text-gray-600">جداول أوقات الدروس والامتحانات - <%= user.studentClass %></p>
+      </div>
+
+      <%- include('../partials/messages') %>
+
+      <% if (schedules.length === 0) { %>
+        <div class="card p-12 text-center">
+          <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
+          <h3 class="text-2xl font-bold text-gray-700 mb-2">لا توجد جداول متاحة حالياً</h3>
+          <p class="text-gray-500">سيتم نشر الجداول الدراسية قريباً</p>
+        </div>
+      <% } else { %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% schedules.forEach(schedule => { %>
+            <div class="card overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              <!-- رأس البطاقة -->
+              <div class="bg-gradient-to-r from-primary-500 to-primary-700 p-6 text-white">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                    <% if (schedule.fileType === 'pdf') { %>
+                      <i class="fas fa-file-pdf text-2xl"></i>
+                    <% } else if (schedule.fileType === 'xlsx' || schedule.fileType === 'xls') { %>
+                      <i class="fas fa-file-excel text-2xl"></i>
+                    <% } else if (schedule.fileType === 'jpg' || schedule.fileType === 'png') { %>
+                      <i class="fas fa-file-image text-2xl"></i>
+                    <% } else { %>
+                      <i class="fas fa-calendar text-2xl"></i>
+                    <% } %>
+                  </div>
+                  <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                    <%= schedule.classLevel %>
+                  </span>
+                </div>
+                <h3 class="text-xl font-bold"><%= schedule.title %></h3>
+              </div>
+
+              <!-- محتوى البطاقة -->
+              <div class="p-6">
+                <% if (schedule.description) { %>
+                  <p class="text-gray-600 mb-4"><%= schedule.description %></p>
+                <% } %>
+
+                <!-- معلومات إضافية -->
+                <div class="space-y-2 mb-4 text-sm text-gray-600">
+                  <div class="flex items-center">
+                    <i class="fas fa-file ml-2 text-gray-400"></i>
+                    <span><%= schedule.fileName %></span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-calendar ml-2 text-gray-400"></i>
+                    <span>
+                      تاريخ النشر: <%= new Date(schedule.created_at).toLocaleDateString('ar-TN') %>
+                    </span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-download ml-2 text-gray-400"></i>
+                    <span>عدد التحميلات: <%= schedule.downloads %></span>
+                  </div>
+                </div>
+
+                <!-- زر التحميل -->
+                <a href="/student/schedules/download/<%= schedule.id %>" class="btn-primary w-full text-center">
+                  <i class="fas fa-download ml-2"></i>
+                  تحميل الجدول
+                </a>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <!-- نصائح -->
+      <div class="bg-blue-50 rounded-lg p-6 mt-8">
+        <h3 class="font-bold text-blue-800 mb-3">
+          <i class="fas fa-lightbulb ml-2"></i>
+          نصائح مهمة
+        </h3>
+        <ul class="space-y-2 text-gray-700">
+          <li class="flex items-start">
+            <i class="fas fa-check-circle text-blue-500 ml-2 mt-1"></i>
+            <span>احتفظ بنسخة من الجدول على هاتفك أو كمبيوترك</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check-circle text-blue-500 ml-2 mt-1"></i>
+            <span>راجع الجدول يومياً لتنظيم وقتك</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check-circle text-blue-500 ml-2 mt-1"></i>
+            <span>احترم أوقات الحصص والمواعيد</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check-circle text-blue-500 ml-2 mt-1"></i>
+            <span>في حالة وجود تغيير، سيتم تحديث الجدول</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

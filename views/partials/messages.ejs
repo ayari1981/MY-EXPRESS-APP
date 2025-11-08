@@ -1,0 +1,26 @@
+<% if (success_msg && success_msg.length > 0) { %>
+  <div class="container mx-auto px-4 mt-4">
+    <div class="alert alert-success fade-in">
+      <i class="fas fa-check-circle ml-2"></i>
+      <%= success_msg %>
+    </div>
+  </div>
+<% } %>
+
+<% if (error_msg && error_msg.length > 0) { %>
+  <div class="container mx-auto px-4 mt-4">
+    <div class="alert alert-error fade-in">
+      <i class="fas fa-exclamation-circle ml-2"></i>
+      <%= error_msg %>
+    </div>
+  </div>
+<% } %>
+
+<% if (error && error.length > 0) { %>
+  <div class="container mx-auto px-4 mt-4">
+    <div class="alert alert-error fade-in">
+      <i class="fas fa-exclamation-circle ml-2"></i>
+      <%= error %>
+    </div>
+  </div>
+<% } %>
