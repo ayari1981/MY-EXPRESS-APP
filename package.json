@@ -1,0 +1,20 @@
+{
+  "name": "my-express-app",
+  "version": "1.0.0",
+  "description": "A basic Express application.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "echo 'Test step not defined'"
+  },
+  "keywords": [],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
