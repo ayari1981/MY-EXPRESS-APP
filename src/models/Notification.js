@@ -18,7 +18,8 @@ const Notification = sequelize.define('Notification', {
   },
   type: {
     type: DataTypes.ENUM('new_lesson', 'comment_approved', 'announcement'),
-    allowNull: false
+    allowNull: false,
+    defaultValue: 'announcement'
   },
   title: {
     type: DataTypes.STRING(200),

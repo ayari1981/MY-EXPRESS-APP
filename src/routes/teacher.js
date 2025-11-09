@@ -249,6 +249,7 @@ router.post('/send-notification', ensureTeacher, async (req, res) => {
     // إنشاء إشعار لكل تلميذ
     const notifications = students.map(student => ({
       userId: student.id,
+      type: 'announcement',
       title: title,
       message: message,
       isRead: false
