@@ -22,11 +22,22 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   if (file.fieldname === 'lessonFile') {
     // قبول ملفات الدروس فقط
-    const allowedTypes = /pdf|docx|doc|pptx|ppt/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
+    const allowedExtensions = /pdf|docx?|pptx?/;
+    const extname = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
     
-    if (extname && mimetype) {
+    // قائمة MIME types المقبولة
+    const allowedMimetypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/octet-stream' // بعض المتصفحات ترسل هذا
+    ];
+    
+    const mimetypeAllowed = allowedMimetypes.includes(file.mimetype);
+    
+    if (extname && (mimetypeAllowed || extname)) {
       return cb(null, true);
     } else {
       cb(new Error('نوع الملف غير مسموح. يرجى رفع ملفات PDF، Word، أو PowerPoint فقط'));

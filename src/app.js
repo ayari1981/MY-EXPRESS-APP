@@ -6,8 +6,24 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const path = require('path');
 const methodOverride = require('method-override');
+const fs = require('fs');
 
 const app = express();
+
+// إنشاء مجلدات الرفع إذا لم تكن موجودة
+const uploadDirs = [
+  path.join(__dirname, '../uploads'),
+  path.join(__dirname, '../uploads/lessons'),
+  path.join(__dirname, '../uploads/profile-pics'),
+  path.join(__dirname, '../uploads/schedules')
+];
+
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`📁 تم إنشاء مجلد: ${dir}`);
+  }
+});
 
 // إعداد Passport
 require('./config/passport')(passport);

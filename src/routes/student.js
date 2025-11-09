@@ -177,11 +177,18 @@ router.get('/download/:id', ensureStudent, async (req, res) => {
       return res.redirect('/student/lessons');
     }
     
+    const filePath = path.join(__dirname, '../../', lesson.fileUrl);
+    
+    // التحقق من وجود الملف
+    if (!require('fs').existsSync(filePath)) {
+      req.flash('error_msg', 'الملف غير متوفر حالياً. يرجى الاتصال بالأستاذ');
+      return res.redirect('/student/lessons');
+    }
+    
     // زيادة عدد التحميلات
     lesson.downloads += 1;
     await lesson.save();
     
-    const filePath = path.join(__dirname, '../../', lesson.fileUrl);
     res.download(filePath, lesson.fileName);
     
   } catch (err) {
