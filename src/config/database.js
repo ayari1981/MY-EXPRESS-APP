@@ -1,12 +1,37 @@
 const { Sequelize } = require('sequelize');
 
-// اختيار مجموعة إعدادات متسقة: إما DB_* أو MYSQL_* أو افتراضي محلي
+// اختيار مجموعة إعدادات متسقة: URL واحد أو DB_* أو MYSQL_* أو افتراضي محلي
 const hasDBSet = Boolean(process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASSWORD && process.env.DB_NAME);
 const hasMYSQLSet = Boolean(process.env.MYSQLHOST && process.env.MYSQLUSER && process.env.MYSQLPASSWORD && process.env.MYSQLDATABASE);
+const connectionUrl = process.env.MYSQL_URL || process.env.DATABASE_URL || '';
 
 let dbName, dbUser, dbPassword, dbHost, dbPort;
 
-if (hasDBSet) {
+const tryParseUrl = (url) => {
+  try {
+    const u = new URL(url);
+    if (u.protocol && u.protocol.startsWith('mysql')) {
+      return {
+        name: (u.pathname || '').replace(/^\//, '') || undefined,
+        user: decodeURIComponent(u.username || ''),
+        password: decodeURIComponent(u.password || ''),
+        host: u.hostname,
+        port: Number(u.port || 3306)
+      };
+    }
+  } catch (e) { /* ignore */ }
+  return null;
+};
+
+const parsed = connectionUrl ? tryParseUrl(connectionUrl) : null;
+
+if (parsed && parsed.host && parsed.user && parsed.name) {
+  dbName = parsed.name;
+  dbUser = parsed.user;
+  dbPassword = parsed.password || '';
+  dbHost = parsed.host;
+  dbPort = parsed.port || 3306;
+} else if (hasDBSet) {
   // استخدم DB_* فقط إذا كانت كاملة
   dbName = process.env.DB_NAME;
   dbUser = process.env.DB_USER;
@@ -66,8 +91,9 @@ const connectDB = async () => {
     console.error('❌ خطأ في الاتصال بقاعدة البيانات:', error.message);
     console.error('� إعدادات الاتصال الحالية:');
     console.error(`   HOST=${dbHost} PORT=${dbPort} DB=${dbName} USER=${dbUser}`);
-    if (process.env.RAILWAY_STATIC_URL || process.env.MYSQLHOST) {
+    if (process.env.RAILWAY_STATIC_URL || process.env.MYSQLHOST || process.env.MYSQL_URL || process.env.DATABASE_URL) {
       console.error('💡 يعمل التطبيق على Railway: تأكد من ربط متغيرات DB_* بقيم MYSQL* في إعدادات الخدمة، أو اترك الكود يقرأ MYSQL* تلقائياً.');
+      console.error('   بدائل مدعومة أيضاً: MYSQL_URL أو DATABASE_URL بصيغة mysql://user:pass@host:port/db');
     } else {
       console.error('💡 محلياً: تأكد من تشغيل MySQL وصحة القيم في ملف .env.');
       console.error('   لإنشاء قاعدة البيانات محلياً:');
