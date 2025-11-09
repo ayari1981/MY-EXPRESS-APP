@@ -20,7 +20,7 @@ const Lesson = sequelize.define('Lesson', {
     allowNull: false
   },
   class: {
-    type: DataTypes.ENUM('السابعة أساسي', 'الثامنة أساسي', 'التاسعة أساسي'),
+    type: DataTypes.STRING(50),
     allowNull: false
   },
   section: {
