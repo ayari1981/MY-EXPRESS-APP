@@ -1,11 +1,33 @@
 const { Sequelize } = require('sequelize');
 
-// قراءة متغيرات البيئة مع دعم تلقائي لمتغيرات Railway (MYSQL*)
-const dbName = process.env.DB_NAME || process.env.MYSQLDATABASE || 'ecole_chebbi';
-const dbUser = process.env.DB_USER || process.env.MYSQLUSER || 'root';
-const dbPassword = process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || 'loi123';
-const dbHost = process.env.DB_HOST || process.env.MYSQLHOST || 'localhost';
-const dbPort = Number(process.env.DB_PORT || process.env.MYSQLPORT || 3306);
+// اختيار مجموعة إعدادات متسقة: إما DB_* أو MYSQL_* أو افتراضي محلي
+const hasDBSet = Boolean(process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASSWORD && process.env.DB_NAME);
+const hasMYSQLSet = Boolean(process.env.MYSQLHOST && process.env.MYSQLUSER && process.env.MYSQLPASSWORD && process.env.MYSQLDATABASE);
+
+let dbName, dbUser, dbPassword, dbHost, dbPort;
+
+if (hasDBSet) {
+  // استخدم DB_* فقط إذا كانت كاملة
+  dbName = process.env.DB_NAME;
+  dbUser = process.env.DB_USER;
+  dbPassword = process.env.DB_PASSWORD;
+  dbHost = process.env.DB_HOST;
+  dbPort = Number(process.env.DB_PORT || 3306);
+} else if (hasMYSQLSet) {
+  // خلاف ذلك، استخدم MYSQL_* الخاصة بـ Railway إذا كانت كاملة
+  dbName = process.env.MYSQLDATABASE;
+  dbUser = process.env.MYSQLUSER;
+  dbPassword = process.env.MYSQLPASSWORD;
+  dbHost = process.env.MYSQLHOST;
+  dbPort = Number(process.env.MYSQLPORT || 3306);
+} else {
+  // افتراضي محلي للتطوير فقط
+  dbName = 'ecole_chebbi';
+  dbUser = 'root';
+  dbPassword = 'loi123';
+  dbHost = 'localhost';
+  dbPort = 3306;
+}
 
 // إنشاء اتصال Sequelize
 const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
