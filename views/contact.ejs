@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link rel="stylesheet" href="/css/output.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+  <%- include('partials/navbar') %>
+
+  <%- include('partials/messages') %>
+
+  <main class="container mx-auto px-4 py-8">
+    <!-- عنوان الصفحة -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-secondary-900 mb-4">اتصل بنا</h1>
+      <p class="text-xl text-gray-600">نحن هنا للإجابة على استفساراتكم</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- معلومات الاتصال -->
+      <div>
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 class="text-2xl font-bold text-secondary-900 mb-6">معلومات الاتصال</h2>
+          
+          <div class="space-y-4">
+            <div class="flex items-start">
+              <i class="fas fa-map-marker-alt text-2xl text-primary-600 ml-4 mt-1"></i>
+              <div>
+                <h3 class="font-bold text-secondary-800 mb-1">العنوان</h3>
+                <p class="text-gray-600">تونس</p>
+              </div>
+            </div>
+
+            <div class="flex items-start">
+              <i class="fas fa-phone text-2xl text-primary-600 ml-4 mt-1"></i>
+              <div>
+                <h3 class="font-bold text-secondary-800 mb-1">الهاتف</h3>
+                <p class="text-gray-600" dir="ltr">+216 XX XXX XXX</p>
+              </div>
+            </div>
+
+            <div class="flex items-start">
+              <i class="fas fa-envelope text-2xl text-primary-600 ml-4 mt-1"></i>
+              <div>
+                <h3 class="font-bold text-secondary-800 mb-1">البريد الإلكتروني</h3>
+                <p class="text-gray-600">info@ecole-chebbi.tn</p>
+              </div>
+            </div>
+
+            <div class="flex items-start">
+              <i class="fas fa-clock text-2xl text-primary-600 ml-4 mt-1"></i>
+              <div>
+                <h3 class="font-bold text-secondary-800 mb-1">ساعات العمل</h3>
+                <p class="text-gray-600">الإثنين - الجمعة: 8:00 ص - 4:00 م</p>
+                <p class="text-gray-600">السبت: 8:00 ص - 12:00 م</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- وسائل التواصل الاجتماعي -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-2xl font-bold text-secondary-900 mb-6">تابعنا على</h2>
+          <div class="flex space-x-reverse space-x-4">
+            <a href="#" class="w-12 h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center transition-colors">
+              <i class="fab fa-facebook text-xl"></i>
+            </a>
+            <a href="#" class="w-12 h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center transition-colors">
+              <i class="fab fa-twitter text-xl"></i>
+            </a>
+            <a href="#" class="w-12 h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center transition-colors">
+              <i class="fab fa-instagram text-xl"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- نموذج الاتصال -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-secondary-900 mb-6">أرسل لنا رسالة</h2>
+        
+        <form method="POST" action="/contact" class="space-y-4">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="أدخل اسمك الكامل"
+            >
+          </div>
+
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="example@email.com"
+            >
+          </div>
+
+          <div>
+            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف (اختياري)</label>
+            <input 
+              type="tel" 
+              id="phone" 
+              name="phone"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="+216 XX XXX XXX"
+            >
+          </div>
+
+          <div>
+            <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">الموضوع</label>
+            <input 
+              type="text" 
+              id="subject" 
+              name="subject" 
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="موضوع الرسالة"
+            >
+          </div>
+
+          <div>
+            <label for="message" class="block text-sm font-medium text-gray-700 mb-2">الرسالة</label>
+            <textarea 
+              id="message" 
+              name="message" 
+              rows="6" 
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+              placeholder="اكتب رسالتك هنا..."
+            ></textarea>
+          </div>
+
+          <button 
+            type="submit"
+            class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+          >
+            <i class="fas fa-paper-plane ml-2"></i>
+            إرسال الرسالة
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>

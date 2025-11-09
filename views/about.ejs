@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | المدرسة الإعدادية أبو القاسم الشابي</title>
+  <link rel="stylesheet" href="/css/output.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+  <%- include('partials/navbar') %>
+
+  <main class="container mx-auto px-4 py-8">
+    <!-- عنوان الصفحة -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-secondary-900 mb-4">من نحن</h1>
+      <p class="text-xl text-gray-600">المدرسة الإعدادية أبو القاسم الشابي</p>
+    </div>
+
+    <!-- رؤيتنا -->
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+      <div class="flex items-center mb-6">
+        <i class="fas fa-eye text-4xl text-primary-600 ml-4"></i>
+        <h2 class="text-3xl font-bold text-secondary-900">رؤيتنا</h2>
+      </div>
+      <p class="text-lg text-gray-700 leading-relaxed">
+        نسعى لأن نكون المؤسسة التعليمية الرائدة في تقديم تعليم متميز يجمع بين الأصالة والمعاصرة،
+        ويبني جيلاً واعياً ومبدعاً قادراً على مواجهة تحديات المستقبل.
+      </p>
+    </div>
+
+    <!-- رسالتنا -->
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+      <div class="flex items-center mb-6">
+        <i class="fas fa-bullseye text-4xl text-primary-600 ml-4"></i>
+        <h2 class="text-3xl font-bold text-secondary-900">رسالتنا</h2>
+      </div>
+      <p class="text-lg text-gray-700 leading-relaxed mb-4">
+        توفير بيئة تعليمية محفزة تساعد الطلاب على:
+      </p>
+      <ul class="space-y-3 text-gray-700">
+        <li class="flex items-start">
+          <i class="fas fa-check-circle text-primary-600 ml-3 mt-1"></i>
+          <span>تطوير مهاراتهم الأكاديمية والشخصية</span>
+        </li>
+        <li class="flex items-start">
+          <i class="fas fa-check-circle text-primary-600 ml-3 mt-1"></i>
+          <span>بناء شخصيات متوازنة ومسؤولة</span>
+        </li>
+        <li class="flex items-start">
+          <i class="fas fa-check-circle text-primary-600 ml-3 mt-1"></i>
+          <span>تنمية روح الإبداع والابتكار</span>
+        </li>
+        <li class="flex items-start">
+          <i class="fas fa-check-circle text-primary-600 ml-3 mt-1"></i>
+          <span>غرس القيم الأخلاقية والوطنية</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- قيمنا -->
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+      <div class="flex items-center mb-6">
+        <i class="fas fa-heart text-4xl text-primary-600 ml-4"></i>
+        <h2 class="text-3xl font-bold text-secondary-900">قيمنا</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="border-r-4 border-primary-600 pr-4">
+          <h3 class="text-xl font-bold text-secondary-800 mb-2">التميز الأكاديمي</h3>
+          <p class="text-gray-600">نلتزم بتقديم أعلى معايير التعليم</p>
+        </div>
+        <div class="border-r-4 border-primary-600 pr-4">
+          <h3 class="text-xl font-bold text-secondary-800 mb-2">الاحترام المتبادل</h3>
+          <p class="text-gray-600">نعزز ثقافة الاحترام بين جميع أفراد المجتمع المدرسي</p>
+        </div>
+        <div class="border-r-4 border-primary-600 pr-4">
+          <h3 class="text-xl font-bold text-secondary-800 mb-2">الإبداع والابتكار</h3>
+          <p class="text-gray-600">نشجع التفكير النقدي والإبداعي</p>
+        </div>
+        <div class="border-r-4 border-primary-600 pr-4">
+          <h3 class="text-xl font-bold text-secondary-800 mb-2">المسؤولية</h3>
+          <p class="text-gray-600">نبني شخصيات مسؤولة تجاه المجتمع</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- تاريخنا -->
+    <div class="bg-white rounded-lg shadow-md p-8">
+      <div class="flex items-center mb-6">
+        <i class="fas fa-book text-4xl text-primary-600 ml-4"></i>
+        <h2 class="text-3xl font-bold text-secondary-900">تاريخنا</h2>
+      </div>
+      <p class="text-lg text-gray-700 leading-relaxed mb-4">
+        تأسست المدرسة الإعدادية أبو القاسم الشابي بهدف توفير تعليم متميز يجمع بين الأصالة والحداثة.
+        على مدار السنوات، تمكنت المدرسة من بناء سمعة قوية في التميز الأكاديمي والتربوي.
+      </p>
+      <p class="text-lg text-gray-700 leading-relaxed">
+        نفخر بخريجينا الذين أصبحوا قادة ومبدعين في مختلف المجالات، وهم خير دليل على نجاح رسالتنا التعليمية.
+      </p>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>

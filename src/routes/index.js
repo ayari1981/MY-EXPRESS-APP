@@ -92,4 +92,15 @@ router.get('/contact', (req, res) => {
   });
 });
 
+// معالجة نموذج اتصل بنا
+router.post('/contact', (req, res) => {
+  const { name, email, phone, subject, message } = req.body;
+  
+  // هنا يمكن إضافة كود لإرسال البريد الإلكتروني أو حفظ الرسالة في قاعدة البيانات
+  console.log('رسالة جديدة من:', { name, email, phone, subject, message });
+  
+  req.flash('success_msg', 'تم إرسال رسالتك بنجاح. سنتواصل معك قريباً.');
+  res.redirect('/contact');
+});
+
 module.exports = router;

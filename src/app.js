@@ -47,8 +47,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24, // 24 ساعة
-      secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
-      httpOnly: true
+      httpOnly: true,
+      sameSite: 'lax'
     }
   })
 );
