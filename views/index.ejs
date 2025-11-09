@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
   <link href="/css/output.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -92,6 +93,174 @@
       </div>
     </div>
   </section>
+
+  <!-- لوحة الشرف - الطلاب المتميزون -->
+  <% if (topStudents && Object.keys(topStudents).length > 0) { %>
+  <section class="honor-board-section">
+    <div class="honor-background-pattern"></div>
+    <div class="container mx-auto px-4">
+      <!-- العنوان الرئيسي -->
+      <div class="honor-title-wrapper">
+        <div class="trophy-icon-animated">
+          <i class="fas fa-trophy"></i>
+        </div>
+        <h2 class="honor-main-title">
+          <span class="title-top">لوحــة الشــرف</span>
+          <span class="title-bottom">نجوم التميز والإبداع</span>
+        </h2>
+        <div class="title-decoration">
+          <span class="star-dec">⭐</span>
+          <span class="line-dec"></span>
+          <span class="star-dec">⭐</span>
+        </div>
+      </div>
+
+      <!-- عرض المواد في تصميم متقدم -->
+      <div class="subjects-showcase">
+        <% Object.keys(topStudents).forEach((subject, subjectIndex) => { %>
+          <div class="subject-container" data-subject="<%= subject %>">
+            <!-- رأس المادة -->
+            <div class="subject-header-modern">
+              <div class="subject-icon-wrapper">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <h3 class="subject-name"><%= subject %></h3>
+              <div class="subject-line"></div>
+            </div>
+            
+            <!-- منصة التتويج -->
+            <div class="podium-container">
+              <% 
+                const students = topStudents[subject];
+                const positions = [1, 0, 2]; // الترتيب: ثاني، أول، ثالث
+              %>
+              <% positions.forEach((idx) => { 
+                if (students[idx]) {
+                  const student = students[idx];
+                  const rank = idx + 1;
+                  const podiumHeight = idx === 0 ? '1st' : idx === 1 ? '2nd' : '3rd';
+              %>
+                <div class="podium-place place-<%= podiumHeight %>" data-rank="<%= rank %>">
+                  <div class="student-avatar">
+                    <div class="avatar-circle rank-<%= rank %>">
+                      <span class="avatar-initial"><%= student.firstName.charAt(0) %><%= student.lastName.charAt(0) %></span>
+                    </div>
+                    <div class="rank-crown">
+                      <% if (rank === 1) { %>
+                        <i class="fas fa-crown"></i>
+                      <% } else if (rank === 2) { %>
+                        <i class="fas fa-medal"></i>
+                      <% } else { %>
+                        <i class="fas fa-award"></i>
+                      <% } %>
+                    </div>
+                  </div>
+                  
+                  <div class="student-info-card">
+                    <h4 class="student-full-name"><%= student.firstName %> <%= student.lastName %></h4>
+                    <p class="student-parent-name">
+                      <i class="fas fa-user-circle"></i>
+                      <% const gender = student.firstName.endsWith('ة') ? 'ابنة' : 'ابن'; %>
+                      <%= gender %> السيد(ة) <%= student.parentName %>
+                    </p>
+                    <div class="grade-showcase">
+                      <div class="grade-circle">
+                        <svg class="grade-progress" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                          <circle class="grade-bg" cx="50" cy="50" r="45"></circle>
+                          <circle class="grade-fill" cx="50" cy="50" r="45" 
+                                  style="stroke-dashoffset: <%= 283 - (283 * student.avgGrade / 20) %>"></circle>
+                        </svg>
+                        <div class="grade-text">
+                          <span class="grade-num"><%= student.avgGrade %></span>
+                          <span class="grade-max">/20</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="stars-rating">
+                      <% for(let i = 0; i < 5; i++) { %>
+                        <% if (i < Math.floor(student.avgGrade / 4)) { %>
+                          <i class="fas fa-star star-filled"></i>
+                        <% } else { %>
+                          <i class="far fa-star star-empty"></i>
+                        <% } %>
+                      <% } %>
+                    </div>
+                  </div>
+                  
+                  <div class="podium-base podium-<%= podiumHeight %>">
+                    <div class="podium-rank">#<%= rank %></div>
+                  </div>
+                </div>
+              <% } %>
+              <% }); %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+
+      <!-- قاعة المشاهير - تصميم متطور -->
+      <div class="hall-of-fame">
+        <div class="hall-title">
+          <i class="fas fa-crown crown-icon"></i>
+          <h3>قاعة المشاهير</h3>
+          <p>الطلاب الأكثر تميزاً عبر جميع المواد</p>
+        </div>
+        
+        <div class="fame-grid">
+          <% 
+            const allTopStudents = [];
+            Object.keys(topStudents).forEach(subject => {
+              topStudents[subject].forEach(student => {
+                allTopStudents.push({ ...student, subject });
+              });
+            });
+            allTopStudents.sort((a, b) => b.avgGrade - a.avgGrade);
+            const top6 = allTopStudents.slice(0, 6);
+          %>
+          <% top6.forEach((student, index) => { %>
+            <div class="fame-card position-<%= index + 1 %>">
+              <div class="fame-card-header">
+                <div class="fame-rank-badge">#<%= index + 1 %></div>
+                <div class="fame-icon">
+                  <% if (index === 0) { %>
+                    <i class="fas fa-trophy trophy-gold"></i>
+                  <% } else if (index === 1) { %>
+                    <i class="fas fa-trophy trophy-silver"></i>
+                  <% } else if (index === 2) { %>
+                    <i class="fas fa-trophy trophy-bronze"></i>
+                  <% } else { %>
+                    <i class="fas fa-star star-blue"></i>
+                  <% } %>
+                </div>
+              </div>
+              
+              <div class="fame-avatar-large">
+                <div class="avatar-ring position-<%= index + 1 %>">
+                  <span class="avatar-text"><%= student.firstName.charAt(0) %><%= student.lastName.charAt(0) %></span>
+                </div>
+              </div>
+              
+              <div class="fame-info">
+                <h4 class="fame-name"><%= student.firstName %> <%= student.lastName %></h4>
+                <p class="fame-parent">
+                  <% const gender = student.firstName.endsWith('ة') ? 'ابنة' : 'ابن'; %>
+                  <%= gender %> السيد(ة) <%= student.parentName %>
+                </p>
+                <div class="fame-subject-badge"><%= student.subject %></div>
+              </div>
+              
+              <div class="fame-grade">
+                <span class="fame-score"><%= student.avgGrade %></span>
+                <span class="fame-total">/20</span>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  </section>
+  <% } %>
 
   <!-- المميزات -->
   <section class="py-16">

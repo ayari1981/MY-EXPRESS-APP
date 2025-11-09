@@ -7,7 +7,8 @@
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
     "build:css": "npx tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch",
-    "create-admin": "node createAdmin.js",
+    "create-admin": "node scripts/createAdmin.js",
+    "add-indexes": "node scripts/add_indexes.sql",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["education", "school", "tunisia", "e-learning"],
