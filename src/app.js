@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const passport = require('passport');
 const flash = require('connect-flash');
 const path = require('path');
@@ -12,7 +13,7 @@ const app = express();
 require('./config/passport')(passport);
 
 // الاتصال بقاعدة البيانات
-const { connectDB } = require('./config/database');
+const { connectDB, sequelize } = require('./config/database');
 connectDB();
 
 // تحميل النماذج مع العلاقات
@@ -29,17 +30,31 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(methodOverride('_method'));
 
+// إعداد تخزين الجلسات في قاعدة البيانات
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+  tableName: 'sessions',
+  checkExpirationInterval: 15 * 60 * 1000, // تنظيف الجلسات المنتهية كل 15 دقيقة
+  expiration: 24 * 60 * 60 * 1000 // انتهاء الجلسة بعد 24 ساعة
+});
+
 // الجلسات
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'ecole-chebbi-secret',
+    store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 // 24 ساعة
+      maxAge: 1000 * 60 * 60 * 24, // 24 ساعة
+      secure: process.env.NODE_ENV === 'production', // HTTPS فقط في الإنتاج
+      httpOnly: true
     }
   })
 );
+
+// إنشاء جدول الجلسات تلقائياً
+sessionStore.sync();
 
 // Passport middleware
 app.use(passport.initialize());
