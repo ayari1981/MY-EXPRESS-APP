@@ -28,13 +28,14 @@
       </div>
       
       <!-- زر القائمة للهاتف -->
-      <button class="md:hidden text-gray-700" id="mobile-menu-btn">
-        <i class="fas fa-bars text-2xl"></i>
+      <button class="md:hidden text-gray-700" id="mobile-menu-btn" aria-controls="mobile-menu" aria-expanded="false" aria-label="فتح القائمة">
+        <span class="sr-only">القائمة الرئيسية</span>
+        <i class="fas fa-bars text-2xl" id="mobile-menu-icon"></i>
       </button>
     </div>
     
     <!-- القائمة للهاتف -->
-    <div class="hidden md:hidden pb-4" id="mobile-menu">
+    <div class="hidden md:hidden pb-4 transition-all duration-300 ease-out" id="mobile-menu" role="navigation" aria-label="القائمة الرئيسية">
       <a href="/" class="block py-2 text-gray-700 hover:text-primary-600">الرئيسية</a>
       <a href="/about" class="block py-2 text-gray-700 hover:text-primary-600">من نحن</a>
       <a href="/contact" class="block py-2 text-gray-700 hover:text-primary-600">اتصل بنا</a>

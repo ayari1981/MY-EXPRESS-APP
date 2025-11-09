@@ -452,13 +452,18 @@ router.get('/schedules/download/:id', ensureAdmin, async (req, res) => {
 // عرض جميع النتائج
 router.get('/grades', ensureAdmin, async (req, res) => {
   try {
-    const { classLevel, subject, semester, teacherId } = req.query;
+    const { classLevel, classNumber, subject, semester } = req.query;
+    
+    // تسجيل الفلاتر للتتبع
+    console.log('📊 فلاتر البحث:', { classLevel, classNumber, subject, semester });
     
     const whereClause = {};
     if (classLevel) whereClause.studentClass = classLevel;
-    if (subject) whereClause.subject = subject;
+    if (classNumber) whereClause.classNumber = classNumber;
+    if (subject) whereClause.subject = { [Op.like]: `%${subject}%` };
     if (semester) whereClause.semester = semester;
-    if (teacherId) whereClause.teacherId = teacherId;
+    
+    console.log('🔍 شروط البحث:', whereClause);
     
     const grades = await Grade.findAll({
       where: whereClause,
@@ -474,8 +479,10 @@ router.get('/grades', ensureAdmin, async (req, res) => {
           attributes: ['id', 'name', 'email']
         }
       ],
-      order: [['studentClass', 'ASC'], ['subject', 'ASC'], ['studentLastName', 'ASC']]
+      order: [['studentClass', 'ASC'], ['classNumber', 'ASC'], ['subject', 'ASC'], ['studentLastName', 'ASC']]
     });
+    
+    console.log(`✅ تم العثور على ${grades.length} نتيجة`);
     
     // جلب جميع المعلمين
     const teachers = await User.findAll({
@@ -498,7 +505,7 @@ router.get('/grades', ensureAdmin, async (req, res) => {
       grades,
       teachers,
       stats,
-      filters: { classLevel, subject, semester, teacherId }
+      filters: { classLevel, classNumber, subject, semester }
     });
   } catch (err) {
     console.error(err);
@@ -590,6 +597,55 @@ router.post('/grades/delete/:id', ensureAdmin, async (req, res) => {
   } catch (err) {
     console.error(err);
     req.flash('error_msg', 'حدث خطأ أثناء الحذف');
+    res.redirect('/admin/grades');
+  }
+});
+
+// صفحة طباعة النتائج لقسم معين
+router.get('/grades/print', ensureAdmin, async (req, res) => {
+  try {
+    const { classLevel, classNumber, subject, semester } = req.query;
+    
+    if (!classLevel) {
+      req.flash('error_msg', 'يجب اختيار القسم للطباعة');
+      return res.redirect('/admin/grades');
+    }
+    
+    const whereClause = { studentClass: classLevel };
+    if (classNumber) whereClause.classNumber = classNumber;
+    if (subject) whereClause.subject = subject;
+    if (semester) whereClause.semester = semester;
+    
+    const grades = await Grade.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: User,
+          as: 'student',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: User,
+          as: 'teacher',
+          attributes: ['id', 'name']
+        }
+      ],
+      order: [['subject', 'ASC'], ['studentLastName', 'ASC'], ['studentFirstName', 'ASC']]
+    });
+    
+    res.render('admin/grades-print', {
+      title: 'طباعة النتائج',
+      grades,
+      filters: { classLevel, classNumber, subject, semester },
+      printDate: new Date().toLocaleDateString('ar-EG', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
     res.redirect('/admin/grades');
   }
 });

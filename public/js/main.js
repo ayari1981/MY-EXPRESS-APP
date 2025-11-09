@@ -1,10 +1,55 @@
-// قائمة الهاتف المحمول
+// قائمة الهاتف المحمول + تحسينات إمكانية الوصول والحركة
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const mobileMenu = document.getElementById('mobile-menu');
+const mobileMenuIcon = document.getElementById('mobile-menu-icon');
 
 if (mobileMenuBtn && mobileMenu) {
-  mobileMenuBtn.addEventListener('click', () => {
-    mobileMenu.classList.toggle('hidden');
+  const openClasses = ['max-h-screen', 'opacity-100'];
+  const closedClasses = ['max-h-0', 'opacity-0'];
+
+  // تهيئة الحالة الأولية للحركة السلسة
+  mobileMenu.style.overflow = 'hidden';
+  mobileMenu.classList.add('opacity-0');
+  mobileMenu.classList.add('max-h-0');
+
+  const toggleMenu = () => {
+    const isOpen = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+    if (isOpen) {
+      // إغلاق
+      openClasses.forEach(c => mobileMenu.classList.remove(c));
+      closedClasses.forEach(c => mobileMenu.classList.add(c));
+      setTimeout(() => mobileMenu.classList.add('hidden'), 250);
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+      mobileMenuBtn.setAttribute('aria-label', 'فتح القائمة');
+      if (mobileMenuIcon) mobileMenuIcon.classList.replace('fa-xmark', 'fa-bars');
+    } else {
+      // فتح
+      mobileMenu.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        closedClasses.forEach(c => mobileMenu.classList.remove(c));
+        openClasses.forEach(c => mobileMenu.classList.add(c));
+      });
+      mobileMenuBtn.setAttribute('aria-expanded', 'true');
+      mobileMenuBtn.setAttribute('aria-label', 'إغلاق القائمة');
+      if (mobileMenuIcon) mobileMenuIcon.classList.replace('fa-bars', 'fa-xmark');
+    }
+  };
+
+  mobileMenuBtn.addEventListener('click', toggleMenu);
+
+  // إغلاق عند الضغط خارج القائمة
+  document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target) && mobileMenuBtn.getAttribute('aria-expanded') === 'true') {
+      toggleMenu();
+    }
+  });
+
+  // إغلاق عند الضغط على زر الهروب
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileMenuBtn.getAttribute('aria-expanded') === 'true') {
+      toggleMenu();
+      mobileMenuBtn.focus();
+    }
   });
 }
 

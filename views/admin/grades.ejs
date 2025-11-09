@@ -88,6 +88,23 @@
               <option value="9 أساسي" <%= filters.classLevel === '9 أساسي' ? 'selected' : '' %>>9 أساسي</option>
             </select>
           </div>
+
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">رقم الصف</label>
+            <select name="classNumber" class="input-field">
+              <option value="">جميع الصفوف</option>
+              <option value="1" <%= filters.classNumber === '1' ? 'selected' : '' %>>1</option>
+              <option value="2" <%= filters.classNumber === '2' ? 'selected' : '' %>>2</option>
+              <option value="3" <%= filters.classNumber === '3' ? 'selected' : '' %>>3</option>
+              <option value="4" <%= filters.classNumber === '4' ? 'selected' : '' %>>4</option>
+              <option value="5" <%= filters.classNumber === '5' ? 'selected' : '' %>>5</option>
+              <option value="6" <%= filters.classNumber === '6' ? 'selected' : '' %>>6</option>
+              <option value="7" <%= filters.classNumber === '7' ? 'selected' : '' %>>7</option>
+              <option value="8" <%= filters.classNumber === '8' ? 'selected' : '' %>>8</option>
+              <option value="9" <%= filters.classNumber === '9' ? 'selected' : '' %>>9</option>
+              <option value="10" <%= filters.classNumber === '10' ? 'selected' : '' %>>10</option>
+            </select>
+          </div>
           
           <div>
             <label class="block text-gray-700 font-semibold mb-2">المادة</label>
@@ -104,29 +121,33 @@
             </select>
           </div>
           
-          <div>
-            <label class="block text-gray-700 font-semibold mb-2">المعلم</label>
-            <select name="teacherId" class="input-field">
-              <option value="">جميع المعلمين</option>
-              <% teachers.forEach(teacher => { %>
-                <option value="<%= teacher.id %>" <%= filters.teacherId == teacher.id ? 'selected' : '' %>>
-                  <%= teacher.firstName %> <%= teacher.lastName %>
-                </option>
-              <% }); %>
-            </select>
-          </div>
-          
           <div class="md:col-span-2 lg:col-span-4 flex gap-3">
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="bg-blue-400 hover:bg-blue-500 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition-colors">
               <i class="fas fa-search ml-2"></i>
               بحث
             </button>
-            <a href="/admin/grades" class="btn-secondary">
+            <a href="/admin/grades" class="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition-colors inline-block">
               <i class="fas fa-redo ml-2"></i>
               إعادة تعيين
             </a>
           </div>
         </form>
+        
+        <!-- أزرار الطباعة خارج الفورم -->
+        <div class="flex gap-3 mt-4">
+          <button type="button" onclick="printCurrentPage()" class="bg-green-400 hover:bg-green-500 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition-colors">
+            <i class="fas fa-print ml-2"></i>
+            طباعة سريعة
+          </button>
+          <% if (filters.classLevel) { %>
+            <a href="/admin/grades/print?classLevel=<%= encodeURIComponent(filters.classLevel) %><%= filters.classNumber ? '&classNumber=' + encodeURIComponent(filters.classNumber) : '' %><%= filters.subject ? '&subject=' + encodeURIComponent(filters.subject) : '' %><%= filters.semester ? '&semester=' + encodeURIComponent(filters.semester) : '' %>" 
+               target="_blank"
+               class="bg-purple-400 hover:bg-purple-500 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition-colors inline-flex items-center">
+              <i class="fas fa-file-pdf ml-2"></i>
+              طباعة احترافية
+            </a>
+          <% } %>
+        </div>
       </div>
 
       <!-- جدول النتائج -->
@@ -219,5 +240,154 @@
   </section>
 
   <%- include('../partials/footer') %>
+
+  <style>
+    @media print {
+      /* إخفاء العناصر غير الضرورية عند الطباعة */
+      nav,
+      footer,
+      button,
+      a,
+      form,
+      .bg-gray-100,
+      .mb-6:first-child,
+      .grid.grid-cols-1.md\\:grid-cols-4 {
+        display: none !important;
+      }
+
+      /* تحسين عرض الجدول للطباعة */
+      body {
+        background: white !important;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+
+      .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        page-break-inside: auto;
+      }
+
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+
+      th, td {
+        border: 1px solid #000 !important;
+        padding: 8px !important;
+        text-align: right;
+        font-size: 11px;
+      }
+
+      thead {
+        background-color: #e0e0e0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      /* إخفاء عمود الإجراءات */
+      th:last-child,
+      td:last-child {
+        display: none !important;
+      }
+
+      /* إضافة ترويسة للطباعة */
+      @page {
+        margin: 1cm;
+      }
+
+      .print-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 15px;
+      }
+
+      .print-header h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+        color: #000;
+      }
+
+      .print-header h2 {
+        font-size: 18px;
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .print-header .print-info {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .print-header .print-info p {
+        margin: 5px 0;
+      }
+
+      /* إخفاء عمود الإجراءات */
+      th:last-child,
+      td:last-child {
+        display: none !important;
+      }
+    }
+
+    .print-header {
+      display: none;
+    }
+  </style>
+
+  <script>
+    function printCurrentPage() {
+      // إضافة ترويسة للطباعة
+      const printHeader = document.createElement('div');
+      printHeader.className = 'print-header';
+      
+      const classLevel = '<%= filters.classLevel || "جميع الأقسام" %>';
+      const classNumber = '<%= filters.classNumber || "" %>';
+      const subject = '<%= filters.subject || "جميع المواد" %>';
+      const semester = '<%= filters.semester || "جميع الفصول" %>';
+      const currentDate = new Date().toLocaleDateString('ar-EG', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      printHeader.innerHTML = `
+        <h1>المدرسة الإعدادية أبو القاسم الشابي</h1>
+        <h2>تقرير النتائج الدراسية</h2>
+        <div class="print-info">
+          <p><strong>القسم:</strong> ${classLevel}${classNumber ? ' - رقم الصف: ' + classNumber : ''}</p>
+          <p><strong>المادة:</strong> ${subject}</p>
+          <p><strong>الفصل:</strong> ${semester}</p>
+          <p><strong>تاريخ الطباعة:</strong> ${currentDate}</p>
+          <p><strong>عدد النتائج:</strong> <%= grades.length %></p>
+        </div>
+      `;
+      
+      // إدراج الترويسة في بداية body
+      document.body.insertBefore(printHeader, document.body.firstChild);
+      
+      // طباعة الصفحة
+      window.print();
+      
+      // إزالة الترويسة بعد الطباعة
+      setTimeout(() => {
+        printHeader.remove();
+      }, 100);
+    }
+  </script>
+  <script src="/js/main.js"></script>
 </body>
 </html>
