@@ -715,6 +715,21 @@ router.post('/records/add', ensureTeacher, async (req, res) => {
       return res.redirect('/teacher/records/add');
     }
     
+    // تحضير البيانات مع التحقق من القيم
+    const studentName = student.name || '';
+    const nameparts = studentName.trim().split(' ').filter(part => part.length > 0);
+    const studentFirstName = nameparts[0] || 'غير محدد';
+    const studentLastName = nameparts.slice(1).join(' ') || 'غير محدد';
+    const studentClass = student.studentClass || 'غير محدد';
+    
+    console.log('🔍 بيانات الطالب:', {
+      id: student.id,
+      name: student.name,
+      studentClass: student.studentClass,
+      parsedFirstName: studentFirstName,
+      parsedLastName: studentLastName
+    });
+    
     // إنشاء السجل
     const record = await StudentRecord.create({
       studentId,
@@ -726,6 +741,12 @@ router.post('/records/add', ensureTeacher, async (req, res) => {
       description,
       notes,
       recordedBy: req.user.id,
+      // المعلومات المطلوبة مع قيم افتراضية آمنة
+      studentFirstName: studentFirstName,
+      studentLastName: studentLastName,
+      studentClass: studentClass,
+      recordedByName: req.user.name || 'غير محدد',
+      recordedByRole: req.user.role || 'teacher',
       parentNotified: true,
       notifiedAt: new Date()
     });
@@ -815,6 +836,59 @@ router.post('/records/delete/:id', ensureTeacher, async (req, res) => {
     console.error(err);
     req.flash('error_msg', 'حدث خطأ أثناء الحذف');
     res.redirect('/teacher/records');
+  }
+});
+
+// طباعة احترافية للنتائج
+router.get('/grades/print', ensureTeacher, async (req, res) => {
+  try {
+    const { classLevel, classNumber, subject, semester } = req.query;
+    
+    if (!classLevel) {
+      req.flash('error_msg', 'يجب اختيار القسم للطباعة');
+      return res.redirect('/teacher/grades');
+    }
+    
+    const whereClause = { 
+      studentClass: classLevel,
+      teacherId: req.user.id  // فقط الدرجات التي يدرسها هذا المدرس
+    };
+    if (classNumber) whereClause.classNumber = classNumber;
+    if (subject) whereClause.subject = subject;
+    if (semester) whereClause.semester = semester;
+    
+    const grades = await Grade.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: User,
+          as: 'student',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: User,
+          as: 'teacher',
+          attributes: ['id', 'name']
+        }
+      ],
+      order: [['subject', 'ASC'], ['studentLastName', 'ASC'], ['studentFirstName', 'ASC']]
+    });
+    
+    res.render('teacher/grades-print', {
+      title: 'طباعة النتائج',
+      grades,
+      filters: { classLevel, classNumber, subject, semester },
+      teacher: req.user.name,
+      printDate: new Date().toLocaleDateString('ar-EG', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'حدث خطأ');
+    res.redirect('/teacher/grades');
   }
 });
 

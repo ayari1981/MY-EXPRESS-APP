@@ -122,11 +122,11 @@
           </div>
           
           <div class="md:col-span-2 lg:col-span-4 flex gap-3">
-            <button type="submit" class="bg-blue-400 hover:bg-blue-500 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition-colors">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-colors">
               <i class="fas fa-search ml-2"></i>
               بحث
             </button>
-            <a href="/admin/grades" class="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition-colors inline-block">
+            <a href="/admin/grades" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-colors inline-block">
               <i class="fas fa-redo ml-2"></i>
               إعادة تعيين
             </a>
@@ -135,14 +135,10 @@
         
         <!-- أزرار الطباعة خارج الفورم -->
         <div class="flex gap-3 mt-4">
-          <button type="button" onclick="printCurrentPage()" class="bg-green-400 hover:bg-green-500 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition-colors">
-            <i class="fas fa-print ml-2"></i>
-            طباعة سريعة
-          </button>
           <% if (filters.classLevel) { %>
             <a href="/admin/grades/print?classLevel=<%= encodeURIComponent(filters.classLevel) %><%= filters.classNumber ? '&classNumber=' + encodeURIComponent(filters.classNumber) : '' %><%= filters.subject ? '&subject=' + encodeURIComponent(filters.subject) : '' %><%= filters.semester ? '&semester=' + encodeURIComponent(filters.semester) : '' %>" 
                target="_blank"
-               class="bg-purple-400 hover:bg-purple-500 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition-colors inline-flex items-center">
+               class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-colors inline-flex items-center">
               <i class="fas fa-file-pdf ml-2"></i>
               طباعة احترافية
             </a>
@@ -348,46 +344,9 @@
     }
   </style>
 
-  <script>
-    function printCurrentPage() {
-      // إضافة ترويسة للطباعة
-      const printHeader = document.createElement('div');
-      printHeader.className = 'print-header';
-      
-      const classLevel = '<%= filters.classLevel || "جميع الأقسام" %>';
-      const classNumber = '<%= filters.classNumber || "" %>';
-      const subject = '<%= filters.subject || "جميع المواد" %>';
-      const semester = '<%= filters.semester || "جميع الفصول" %>';
-      const currentDate = new Date().toLocaleDateString('ar-EG', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-      
-      printHeader.innerHTML = `
-        <h1>المدرسة الإعدادية أبو القاسم الشابي</h1>
-        <h2>تقرير النتائج الدراسية</h2>
-        <div class="print-info">
-          <p><strong>القسم:</strong> ${classLevel}${classNumber ? ' - رقم الصف: ' + classNumber : ''}</p>
-          <p><strong>المادة:</strong> ${subject}</p>
-          <p><strong>الفصل:</strong> ${semester}</p>
-          <p><strong>تاريخ الطباعة:</strong> ${currentDate}</p>
-          <p><strong>عدد النتائج:</strong> <%= grades.length %></p>
-        </div>
-      `;
-      
-      // إدراج الترويسة في بداية body
-      document.body.insertBefore(printHeader, document.body.firstChild);
-      
-      // طباعة الصفحة
-      window.print();
-      
-      // إزالة الترويسة بعد الطباعة
-      setTimeout(() => {
-        printHeader.remove();
-      }, 100);
-    }
-  </script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
   <script src="/js/main.js"></script>
 </body>
 </html>

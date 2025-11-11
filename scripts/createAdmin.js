@@ -2,8 +2,10 @@
 // شغّل هذا السكريبت باستخدام: node createAdmin.js
 
 require('dotenv').config();
-const { sequelize, connectDB } = require('./src/config/database');
-const User = require('./src/models/User');
+const path = require('path');
+// المسارات مصححة: السكريبت موجود داخل مجلد scripts، لذا نحتاج للرجوع للمجلد الأعلى
+const { sequelize, connectDB } = require(path.join(__dirname, '..', 'src', 'config', 'database'));
+const User = require(path.join(__dirname, '..', 'src', 'models', 'User'));
 
 async function createAdmin() {
   try {

@@ -191,10 +191,13 @@
 
             <!-- الأزرار -->
             <div class="flex gap-4">
-              <button type="submit" class="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 rounded-lg hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 shadow-md text-lg font-bold">
-                <i class="fas fa-save ml-2"></i>حفظ السجل
+              <!-- زر الحفظ بلون أخضر واضح -->
+              <button type="submit" id="saveButton" 
+                      class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-lg text-lg font-bold border-2 border-green-400">
+                <i class="fas fa-save ml-2"></i>
+                <span id="saveButtonText">حفظ السجل</span>
               </button>
-              <a href="/teacher/records" class="flex-1 bg-gray-500 text-white px-6 py-4 rounded-lg hover:bg-gray-600 transition-all text-center shadow-md text-lg font-bold">
+              <a href="/teacher/records" class="flex-1 bg-red-500 text-white px-6 py-4 rounded-lg hover:bg-red-600 transition-all text-center shadow-md text-lg font-bold">
                 <i class="fas fa-times ml-2"></i>إلغاء
               </a>
             </div>
@@ -213,26 +216,40 @@ document.getElementById('recordType').addEventListener('change', function() {
   const recordType = this.value;
   const absenceFields = document.getElementById('absenceFields');
   const punishmentFields = document.getElementById('punishmentFields');
+  const saveButton = document.getElementById('saveButton');
+  const saveButtonText = document.getElementById('saveButtonText');
   
   // إخفاء جميع الحقول
   absenceFields.classList.add('hidden');
   punishmentFields.classList.add('hidden');
   
-  // إظهار الحقول المطلوبة
+  // إعادة تعيين الألوان والنصوص
+  saveButton.className = 'flex-1 text-white px-6 py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg text-lg font-bold';
+  
+  // إظهار الحقول المطلوبة وتغيير لون الزر
   if (recordType === 'absence') {
     absenceFields.classList.remove('hidden');
     document.getElementById('absenceType').required = true;
     document.getElementById('punishmentType').required = false;
     document.getElementById('punishmentSeverity').required = false;
+    // لون أزرق للغياب
+    saveButton.className += ' bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-2 border-blue-400';
+    saveButtonText.textContent = 'حفظ الغياب';
   } else if (recordType === 'punishment') {
     punishmentFields.classList.remove('hidden');
     document.getElementById('absenceType').required = false;
     document.getElementById('punishmentType').required = true;
     document.getElementById('punishmentSeverity').required = true;
+    // لون أحمر للعقوبة
+    saveButton.className += ' bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-2 border-red-400';
+    saveButtonText.textContent = 'حفظ العقوبة';
   } else {
     document.getElementById('absenceType').required = false;
     document.getElementById('punishmentType').required = false;
     document.getElementById('punishmentSeverity').required = false;
+    // لون أخضر للملاحظة
+    saveButton.className += ' bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-2 border-green-400';
+    saveButtonText.textContent = 'حفظ السجل';
   }
 });
 
