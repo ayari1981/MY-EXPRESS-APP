@@ -14,12 +14,23 @@ router.get('/login', ensureGuest, (req, res) => {
 
 // معالجة تسجيل الدخول
 router.post('/login', (req, res, next) => {
+  const { accessCode } = req.body;
+  const ACCESS_CODE = process.env.TEACHER_ACCESS_CODE || '1981';
+  
   passport.authenticate('local', async (err, user, info) => {
     if (err) { return next(err); }
     
     if (!user) {
       req.flash('error_msg', info.message);
       return res.redirect('/auth/login');
+    }
+    
+    // التحقق من كود الدخول للمعلمين والإدارة
+    if (user.role === 'teacher' || user.role === 'admin') {
+      if (!accessCode || accessCode !== ACCESS_CODE) {
+        req.flash('error_msg', 'كود الدخول الخاص غير صحيح. المعلمين والإدارة يحتاجون إلى كود صحيح للدخول.');
+        return res.redirect('/auth/login');
+      }
     }
     
     req.logIn(user, async (err) => {
