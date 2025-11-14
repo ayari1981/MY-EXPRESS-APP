@@ -6,7 +6,7 @@ async function viewAllTables() {
     host: process.env.DB_HOST || 'metro.proxy.rlwy.net',
     port: Number(process.env.DB_PORT) || 51425,
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'SWRwvEsAmiQYoxmesxpxOulHjwfeYUzt',
+    password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '',
     database: process.env.DB_NAME || 'railway'
   };
 

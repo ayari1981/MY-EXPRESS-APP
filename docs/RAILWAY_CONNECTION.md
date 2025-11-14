@@ -151,7 +151,7 @@ http://localhost:3000/auth/login
 ### باستخدام Terminal:
 
 ```bash
-mysqldump -h metro.proxy.rlwy.net -P 51425 -u root -p'SWRwvEsAmiQYoxmesxpxOulHjwfeYUzt' railway > railway_backup.sql
+mysqldump -h [RAILWAY_HOST] -P [PORT] -u [USER] -p'[PASSWORD]' [DATABASE] > railway_backup.sql
 ```
 
 ---

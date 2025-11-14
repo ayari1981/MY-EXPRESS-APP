@@ -40,7 +40,7 @@ async function verifyRailwayDB() {
     console.log('\n✅ قاعدة البيانات تعمل بشكل صحيح!');
     console.log('\n📝 الخطوة التالية:');
     console.log('   أضف هذا المتغير في Railway Variables:');
-    console.log('   MYSQL_URL=mysql://root:SWRwvEsAmiQYoxmesxpxOulHjwfeYUzt@metro.proxy.rlwy.net:51425/railway');
+    console.log('   MYSQL_URL=mysql://[user]:[password]@[host]:[port]/[database]');
 
     await connection.end();
   } catch (error) {

@@ -12,9 +12,9 @@
 3. اضغط على الخدمة (Service)
 4. اذهب إلى تبويب **Variables**
 5. اضغط **New Variable**
-6. املأ:
+5. املأ:
    - **Variable Name:** `MYSQL_URL`
-   - **Value:** `mysql://root:SWRwvEsAmiQYoxmesxpxOulHjwfeYUzt@metro.proxy.rlwy.net:51425/railway`
+   - **Value:** Utilisez les valeurs de votre base de données Railway (format: `mysql://user:password@host:port/database`)
 7. اضغط **Add**
 8. سيعيد Railway النشر تلقائياً
 
@@ -26,11 +26,11 @@
 
 | Variable Name | Value |
 |--------------|-------|
-| `DB_HOST` | `metro.proxy.rlwy.net` |
-| `DB_PORT` | `51425` |
-| `DB_NAME` | `railway` |
-| `DB_USER` | `root` |
-| `DB_PASSWORD` | `SWRwvEsAmiQYoxmesxpxOulHjwfeYUzt` |
+| `DB_HOST` | Votre hôte Railway |
+| `DB_PORT` | Votre port Railway |
+| `DB_NAME` | Votre nom de base de données |
+| `DB_USER` | Votre utilisateur Railway |
+| `DB_PASSWORD` | Votre mot de passe Railway |
 
 ---
 
