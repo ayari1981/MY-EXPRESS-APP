@@ -83,6 +83,28 @@ const connectDB = async () => {
     console.log(`📊 قاعدة البيانات: ${dbName}`);
     console.log(`🗄️ المضيف: ${dbHost}:${dbPort}`);
     
+    // تشغيل migrations التلقائية - حذف الأعمدة غير المستخدمة
+    try {
+      const [columns] = await sequelize.query(`
+        SELECT COLUMN_NAME 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = DATABASE() 
+        AND TABLE_NAME = 'users'
+        AND COLUMN_NAME IN ('class_section', 'student_section')
+      `);
+      
+      if (columns.length > 0) {
+        console.log('🔄 تشغيل migration: حذف الأعمدة غير المستخدمة...');
+        for (const col of columns) {
+          const columnName = col.COLUMN_NAME;
+          await sequelize.query(`ALTER TABLE users DROP COLUMN ${columnName}`);
+          console.log(`✅ تم حذف العمود: ${columnName}`);
+        }
+      }
+    } catch (migrationError) {
+      console.warn('⚠️ تحذير في migration:', migrationError.message);
+    }
+    
     // مزامنة النماذج مع قاعدة البيانات
     await sequelize.sync({ alter: false }); // استخدم { force: true } لحذف وإعادة إنشاء الجداول
     console.log('✅ تم مزامنة النماذج مع قاعدة البيانات');
