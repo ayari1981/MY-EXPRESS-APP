@@ -19,13 +19,15 @@ const Lesson = sequelize.define('Lesson', {
     type: DataTypes.STRING(100),
     allowNull: false
   },
-  class: {
+  studentClass: {
     type: DataTypes.STRING(50),
-    allowNull: false
+    allowNull: false,
+    field: 'student_class'
   },
-  section: {
+  classNumber: {
     type: DataTypes.STRING(10),
-    allowNull: true
+    allowNull: true,
+    field: 'class_number'
   },
   teacherId: {
     type: DataTypes.INTEGER,

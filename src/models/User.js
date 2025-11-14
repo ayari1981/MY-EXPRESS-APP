@@ -40,11 +40,6 @@ const User = sequelize.define('User', {
     allowNull: true,
     field: 'class_number'
   },
-  studentSection: {
-    type: DataTypes.STRING(10),
-    allowNull: true,
-    field: 'student_section'
-  },
   parentId: {
     type: DataTypes.INTEGER,
     allowNull: true,

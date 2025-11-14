@@ -60,8 +60,8 @@ router.post('/upload', ensureTeacher, upload.single('lessonFile'), async (req, r
       title,
       description,
       subject,
-      class: classLevel,
-      section,
+      studentClass: classLevel,
+      classNumber: section,
       teacherId: req.user.id,
       fileUrl: '/uploads/lessons/' + req.file.filename,
       fileName: req.file.originalname,
@@ -129,8 +129,8 @@ router.post('/edit/:id', ensureTeacher, async (req, res) => {
     lesson.title = title;
     lesson.description = description;
     lesson.subject = subject;
-    lesson.class = classLevel;
-    lesson.section = section;
+    lesson.studentClass = classLevel;
+    lesson.classNumber = section;
     
     await lesson.save();
     
@@ -174,17 +174,9 @@ router.post('/delete/:id', ensureTeacher, async (req, res) => {
 // صفحة إرسال إشعار
 router.get('/send-notification', ensureTeacher, async (req, res) => {
   try {
-    // جلب جميع التلاميذ لإمكانية اختيار تلميذ معين
-    const students = await User.findAll({
-      where: { role: 'student' },
-      attributes: ['id', 'name', 'studentClass'],
-      order: [['studentClass', 'ASC'], ['name', 'ASC']]
-    });
-    
     res.render('teacher/send-notification', {
       title: 'إرسال إشعار',
-      user: req.user,
-      students: students
+      user: req.user
     });
   } catch (err) {
     console.error(err);
@@ -193,10 +185,58 @@ router.get('/send-notification', ensureTeacher, async (req, res) => {
   }
 });
 
+// API: الحصول على الصفوف حسب القسم
+router.get('/api/sections-by-class/:classLevel', ensureTeacher, async (req, res) => {
+  try {
+    const { classLevel } = req.params;
+    
+    const sections = await User.findAll({
+      where: { 
+        role: 'student',
+        studentClass: classLevel
+      },
+      attributes: ['classNumber'],
+      group: ['classNumber'],
+      order: [['classNumber', 'ASC']]
+    });
+    
+    const sectionList = sections
+      .map(s => s.classNumber)
+      .filter(s => s && s.trim() !== '');
+    
+    res.json({ sections: sectionList });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'حدث خطأ' });
+  }
+});
+
+// API: الحصول على التلاميذ حسب القسم والصف
+router.get('/api/students-by-section/:classLevel/:section', ensureTeacher, async (req, res) => {
+  try {
+    const { classLevel, section } = req.params;
+    
+    const students = await User.findAll({
+      where: { 
+        role: 'student',
+        studentClass: classLevel,
+        classNumber: section
+      },
+      attributes: ['id', 'name', 'studentClass', 'classNumber'],
+      order: [['name', 'ASC']]
+    });
+    
+    res.json({ students });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'حدث خطأ' });
+  }
+});
+
 // معالجة إرسال الإشعار
 router.post('/send-notification', ensureTeacher, async (req, res) => {
   try {
-    const { notificationType, targetClass, specificStudent, title, message } = req.body;
+    const { notificationType, targetClass, targetSection, specificStudent, title, message } = req.body;
     
     if (!notificationType || !title || !message) {
       req.flash('error_msg', 'الرجاء ملء جميع الحقول المطلوبة');
@@ -204,6 +244,7 @@ router.post('/send-notification', ensureTeacher, async (req, res) => {
     }
     
     let students = [];
+    let successMessage = '';
     
     // إرسال لتلميذ معين
     if (notificationType === 'specific') {
@@ -225,7 +266,30 @@ router.post('/send-notification', ensureTeacher, async (req, res) => {
       }
       
       students = [student];
+      successMessage = `تم إرسال الإشعار بنجاح إلى ${student.name}`;
     } 
+    // إرسال لصف معين من قسم
+    else if (notificationType === 'section') {
+      if (!targetClass || !targetSection) {
+        req.flash('error_msg', 'الرجاء اختيار القسم والصف');
+        return res.redirect('/teacher/send-notification');
+      }
+      
+      students = await User.findAll({
+        where: {
+          role: 'student',
+          studentClass: targetClass,
+          classNumber: targetSection
+        }
+      });
+      
+      if (students.length === 0) {
+        req.flash('error_msg', 'لا يوجد تلاميذ في هذا الصف');
+        return res.redirect('/teacher/send-notification');
+      }
+      
+      successMessage = `تم إرسال الإشعار بنجاح إلى ${students.length} تلميذ في ${targetClass} - صف ${targetSection}`;
+    }
     // إرسال لقسم كامل
     else if (notificationType === 'class') {
       if (!targetClass) {
@@ -244,6 +308,8 @@ router.post('/send-notification', ensureTeacher, async (req, res) => {
         req.flash('error_msg', 'لا يوجد تلاميذ في هذا القسم');
         return res.redirect('/teacher/send-notification');
       }
+      
+      successMessage = `تم إرسال الإشعار بنجاح إلى ${students.length} تلميذ في ${targetClass}`;
     }
     
     // إنشاء إشعار لكل تلميذ
@@ -257,12 +323,7 @@ router.post('/send-notification', ensureTeacher, async (req, res) => {
     
     await Notification.bulkCreate(notifications);
     
-    if (notificationType === 'specific') {
-      req.flash('success_msg', `تم إرسال الإشعار بنجاح إلى ${students[0].name}`);
-    } else {
-      req.flash('success_msg', `تم إرسال الإشعار بنجاح إلى ${students.length} تلميذ في ${targetClass}`);
-    }
-    
+    req.flash('success_msg', successMessage);
     res.redirect('/teacher/dashboard');
     
   } catch (err) {
@@ -879,10 +940,10 @@ router.get('/grades/print', ensureTeacher, async (req, res) => {
       grades,
       filters: { classLevel, classNumber, subject, semester },
       teacher: req.user.name,
-      printDate: new Date().toLocaleDateString('ar-EG', { 
+      printDate: new Date().toLocaleDateString('fr-FR', { 
         year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+        month: '2-digit', 
+        day: '2-digit' 
       })
     });
   } catch (err) {

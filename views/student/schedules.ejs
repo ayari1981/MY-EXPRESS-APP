@@ -17,7 +17,18 @@
           <i class="fas fa-calendar-alt ml-2 text-primary-600"></i>
           الجدول المدرسي وروزنامة الفروض التأليفية
         </h1>
-        <p class="text-gray-600">جداول أوقات الدروس والامتحانات - <%= user.studentClass %></p>
+        <div class="flex flex-wrap gap-3 text-gray-600">
+          <p>
+            جداول أوقات الدروس والامتحانات - 
+            <span class="font-semibold text-primary-600"><%= user.studentClass %></span>
+          </p>
+          <% if (user.classNumber) { %>
+          <p>
+            <i class="fas fa-users ml-1 text-green-600"></i>
+            صف <span class="font-semibold text-green-600"><%= user.classNumber %></span>
+          </p>
+          <% } %>
+        </div>
       </div>
 
       <%- include('../partials/messages') %>
@@ -68,7 +79,7 @@
                   <div class="flex items-center">
                     <i class="fas fa-calendar ml-2 text-gray-400"></i>
                     <span>
-                      تاريخ النشر: <%= new Date(schedule.created_at).toLocaleDateString('ar-TN') %>
+                      تاريخ النشر: <%= new Date(schedule.created_at).toLocaleDateString('fr-FR') %>
                     </span>
                   </div>
                   <div class="flex items-center">

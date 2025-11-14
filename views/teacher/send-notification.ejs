@@ -53,6 +53,17 @@
                 </label>
                 
                 <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 transition-colors">
+                  <input type="radio" name="notificationType" value="section" class="ml-3 w-5 h-5 text-primary-600" onchange="toggleNotificationType()">
+                  <div>
+                    <div class="font-semibold text-gray-800">
+                      <i class="fas fa-users ml-1 text-green-600"></i>
+                      إرسال لصف معين من قسم
+                    </div>
+                    <div class="text-sm text-gray-600">إرسال الإشعار لجميع تلاميذ صف محدد من القسم</div>
+                  </div>
+                </label>
+                
+                <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 transition-colors">
                   <input type="radio" name="notificationType" value="specific" class="ml-3 w-5 h-5 text-primary-600" onchange="toggleNotificationType()">
                   <div>
                     <div class="font-semibold text-gray-800">
@@ -65,50 +76,50 @@
               </div>
             </div>
 
-            <!-- القسم المستهدف (للإرسال الجماعي) -->
+            <!-- المرحلة 1: اختيار القسم -->
             <div class="mb-6" id="classSelection">
               <label class="block text-gray-700 font-semibold mb-2" for="targetClass">
                 <i class="fas fa-graduation-cap ml-2"></i>
-                القسم المستهدف *
+                <span id="classLabel">القسم المستهدف *</span>
               </label>
-              <select id="targetClass" name="targetClass" class="input-field">
+              <select id="targetClass" name="targetClass" class="input-field" onchange="loadSections()">
                 <option value="">اختر القسم</option>
                 <option value="السابعة أساسي">السابعة أساسي</option>
                 <option value="الثامنة أساسي">الثامنة أساسي</option>
                 <option value="التاسعة أساسي">التاسعة أساسي</option>
               </select>
-              <p class="text-sm text-gray-500 mt-1">
-                سيتم إرسال الإشعار لجميع تلاميذ القسم المحدد
+              <p class="text-sm text-gray-500 mt-1" id="classHint">
+                اختر القسم أولاً
               </p>
             </div>
 
-            <!-- التلميذ المحدد (للإرسال الفردي) -->
+            <!-- المرحلة 2: اختيار الصف (يظهر فقط عند اختيار "صف معين" أو "تلميذ معين") -->
+            <div class="mb-6 hidden" id="sectionSelection">
+              <label class="block text-gray-700 font-semibold mb-2" for="targetSection">
+                <i class="fas fa-users ml-2"></i>
+                الصف المستهدف *
+              </label>
+              <select id="targetSection" name="targetSection" class="input-field" onchange="loadStudents()" disabled>
+                <option value="">اختر الصف</option>
+              </select>
+              <p class="text-sm text-gray-500 mt-1">
+                <i class="fas fa-info-circle ml-1"></i>
+                اختر القسم أولاً لتحميل الصفوف المتاحة
+              </p>
+            </div>
+
+            <!-- المرحلة 3: اختيار التلميذ (يظهر فقط عند اختيار "تلميذ معين") -->
             <div class="mb-6 hidden" id="studentSelection">
               <label class="block text-gray-700 font-semibold mb-2" for="specificStudent">
                 <i class="fas fa-user-graduate ml-2"></i>
                 اختر التلميذ *
               </label>
-              <select id="specificStudent" name="specificStudent" class="input-field">
+              <select id="specificStudent" name="specificStudent" class="input-field" disabled>
                 <option value="">اختر التلميذ</option>
-                <% 
-                let currentClass = '';
-                students.forEach(student => { 
-                  if (currentClass !== student.studentClass) {
-                    if (currentClass !== '') { %>
-                      </optgroup>
-                    <% }
-                    currentClass = student.studentClass;
-                  %>
-                    <optgroup label="<%= student.studentClass %>">
-                  <% } %>
-                    <option value="<%= student.id %>"><%= student.name %> (<%= student.studentClass %>)</option>
-                <% }); 
-                if (currentClass !== '') { %>
-                  </optgroup>
-                <% } %>
               </select>
               <p class="text-sm text-gray-500 mt-1">
-                اختر تلميذاً واحداً لإرسال الإشعار له
+                <i class="fas fa-info-circle ml-1"></i>
+                اختر القسم والصف أولاً لتحميل قائمة التلاميذ
               </p>
             </div>
 
@@ -183,6 +194,8 @@
               <ul class="text-sm text-gray-700 space-y-1" id="importantNotes">
                 <li class="class-note"><i class="fas fa-check text-green-500 ml-1"></i> تأكد من اختيار القسم الصحيح</li>
                 <li class="class-note"><i class="fas fa-check text-green-500 ml-1"></i> سيصل الإشعار لجميع تلاميذ القسم فوراً</li>
+                <li class="section-note hidden"><i class="fas fa-check text-green-500 ml-1"></i> تأكد من اختيار القسم والصف الصحيحين</li>
+                <li class="section-note hidden"><i class="fas fa-check text-green-500 ml-1"></i> سيصل الإشعار لجميع تلاميذ الصف المحدد فقط</li>
                 <li class="student-note hidden"><i class="fas fa-check text-green-500 ml-1"></i> تأكد من اختيار التلميذ الصحيح</li>
                 <li class="student-note hidden"><i class="fas fa-check text-green-500 ml-1"></i> سيصل الإشعار للتلميذ المحدد فقط</li>
                 <li><i class="fas fa-check text-green-500 ml-1"></i> يمكن للتلاميذ مشاهدة الإشعار في صفحة الإشعارات</li>
@@ -248,30 +261,168 @@
     function toggleNotificationType() {
       const notificationType = document.querySelector('input[name="notificationType"]:checked').value;
       const classSelection = document.getElementById('classSelection');
+      const sectionSelection = document.getElementById('sectionSelection');
       const studentSelection = document.getElementById('studentSelection');
       const targetClass = document.getElementById('targetClass');
+      const targetSection = document.getElementById('targetSection');
       const specificStudent = document.getElementById('specificStudent');
+      const classLabel = document.getElementById('classLabel');
+      const classHint = document.getElementById('classHint');
       const classNotes = document.querySelectorAll('.class-note');
+      const sectionNotes = document.querySelectorAll('.section-note');
       const studentNotes = document.querySelectorAll('.student-note');
       
+      // إعادة تعيين جميع الحقول
+      targetClass.value = '';
+      targetSection.value = '';
+      specificStudent.value = '';
+      targetSection.disabled = true;
+      specificStudent.disabled = true;
+      targetSection.innerHTML = '<option value="">اختر الفصل</option>';
+      specificStudent.innerHTML = '<option value="">اختر التلميذ</option>';
+      
+      // إخفاء جميع الملاحظات
+      classNotes.forEach(note => note.classList.add('hidden'));
+      sectionNotes.forEach(note => note.classList.add('hidden'));
+      studentNotes.forEach(note => note.classList.add('hidden'));
+      
       if (notificationType === 'class') {
+        // إرسال لقسم كامل
         classSelection.classList.remove('hidden');
+        sectionSelection.classList.add('hidden');
         studentSelection.classList.add('hidden');
         targetClass.required = true;
+        targetSection.required = false;
         specificStudent.required = false;
-        specificStudent.value = '';
+        classLabel.textContent = 'القسم المستهدف *';
+        classHint.innerHTML = 'سيتم إرسال الإشعار لجميع تلاميذ القسم المحدد';
         classNotes.forEach(note => note.classList.remove('hidden'));
-        studentNotes.forEach(note => note.classList.add('hidden'));
+      } else if (notificationType === 'section') {
+        // إرسال لصف معين
+        classSelection.classList.remove('hidden');
+        sectionSelection.classList.remove('hidden');
+        studentSelection.classList.add('hidden');
+        targetClass.required = true;
+        targetSection.required = true;
+        specificStudent.required = false;
+        classLabel.textContent = 'اختر القسم *';
+        classHint.innerHTML = '<i class="fas fa-arrow-down ml-1 text-primary-600"></i> بعد اختيار القسم، اختر الصف المستهدف';
+        sectionNotes.forEach(note => note.classList.remove('hidden'));
       } else {
-        classSelection.classList.add('hidden');
+        // إرسال لتلميذ معين
+        classSelection.classList.remove('hidden');
+        sectionSelection.classList.remove('hidden');
         studentSelection.classList.remove('hidden');
-        targetClass.required = false;
+        targetClass.required = true;
+        targetSection.required = true;
         specificStudent.required = true;
-        targetClass.value = '';
-        classNotes.forEach(note => note.classList.add('hidden'));
+        classLabel.textContent = 'اختر القسم *';
+        classHint.innerHTML = '<i class="fas fa-arrow-down ml-1 text-blue-600"></i> المرحلة 1 من 3: اختر القسم أولاً';
         studentNotes.forEach(note => note.classList.remove('hidden'));
       }
     }
+
+    // تحميل الصفوف عند اختيار القسم
+    async function loadSections() {
+      const classLevel = document.getElementById('targetClass').value;
+      const sectionSelect = document.getElementById('targetSection');
+      const studentSelect = document.getElementById('specificStudent');
+      const notificationType = document.querySelector('input[name="notificationType"]:checked').value;
+      
+      // إعادة تعيين الصفوف والتلاميذ
+      sectionSelect.innerHTML = '<option value="">جاري التحميل...</option>';
+      sectionSelect.disabled = true;
+      studentSelect.innerHTML = '<option value="">اختر التلميذ</option>';
+      studentSelect.disabled = true;
+      
+      if (!classLevel) {
+        sectionSelect.innerHTML = '<option value="">اختر الصف</option>';
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/teacher/api/sections-by-class/${encodeURIComponent(classLevel)}`);
+        const data = await response.json();
+        
+        if (data.sections && data.sections.length > 0) {
+          sectionSelect.innerHTML = '<option value="">اختر الصف</option>';
+          data.sections.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section;
+            option.textContent = `صف ${section}`;
+            sectionSelect.appendChild(option);
+          });
+          sectionSelect.disabled = false;
+          
+          // تحديث التلميحات
+          if (notificationType === 'section') {
+            document.getElementById('classHint').innerHTML = '<i class="fas fa-check text-green-600 ml-1"></i> تم تحميل الصفوف - اختر الصف المستهدف';
+          } else if (notificationType === 'specific') {
+            document.getElementById('classHint').innerHTML = '<i class="fas fa-check text-green-600 ml-1"></i> المرحلة 1 مكتملة - الآن اختر الصف';
+          }
+        } else {
+          sectionSelect.innerHTML = '<option value="">لا توجد صفوف متاحة</option>';
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل الصفوف:', error);
+        sectionSelect.innerHTML = '<option value="">حدث خطأ في التحميل</option>';
+      }
+    }
+
+    // تحميل التلاميذ عند اختيار الصف
+    async function loadStudents() {
+      const classLevel = document.getElementById('targetClass').value;
+      const section = document.getElementById('targetSection').value;
+      const studentSelect = document.getElementById('specificStudent');
+      const notificationType = document.querySelector('input[name="notificationType"]:checked').value;
+      
+      studentSelect.innerHTML = '<option value="">جاري التحميل...</option>';
+      studentSelect.disabled = true;
+      
+      if (!classLevel || !section) {
+        studentSelect.innerHTML = '<option value="">اختر التلميذ</option>';
+        return;
+      }
+      
+      // تحديث التلميح للإرسال لصف معين
+      if (notificationType === 'section') {
+        document.getElementById('classHint').innerHTML = '<i class="fas fa-check-double text-green-600 ml-1"></i> تم اختيار القسم والصف - جاهز للإرسال';
+      }
+      
+      // إذا كان نوع الإرسال "صف معين"، لا نحتاج تحميل التلاميذ
+      if (notificationType !== 'specific') {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/teacher/api/students-by-section/${encodeURIComponent(classLevel)}/${encodeURIComponent(section)}`);
+        const data = await response.json();
+        
+        if (data.students && data.students.length > 0) {
+          studentSelect.innerHTML = '<option value="">اختر التلميذ</option>';
+          data.students.forEach(student => {
+            const option = document.createElement('option');
+            option.value = student.id;
+            option.textContent = student.name;
+            studentSelect.appendChild(option);
+          });
+          studentSelect.disabled = false;
+          document.getElementById('classHint').innerHTML = '<i class="fas fa-check-double text-green-600 ml-1"></i> المرحلة 2 مكتملة - الآن اختر التلميذ';
+        } else {
+          studentSelect.innerHTML = '<option value="">لا يوجد تلاميذ في هذا الصف</option>';
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل التلاميذ:', error);
+        studentSelect.innerHTML = '<option value="">حدث خطأ في التحميل</option>';
+      }
+    }
+
+    // تحديث التلميح عند اختيار التلميذ
+    document.getElementById('specificStudent').addEventListener('change', function() {
+      if (this.value) {
+        document.getElementById('classHint').innerHTML = '<i class="fas fa-check-circle text-green-600 ml-1"></i> جميع المراحل مكتملة - جاهز للإرسال';
+      }
+    });
 
     // تشغيل عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', function() {

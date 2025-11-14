@@ -40,7 +40,8 @@ footer {
     position: relative;
     padding: 80px 0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    overflow: hidden;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 .honor-background-pattern {
@@ -134,6 +135,10 @@ footer {
     gap: 50px;
     position: relative;
     z-index: 1;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 20px;
+    margin: 0 auto;
 }
 
 .subject-container {
@@ -290,7 +295,9 @@ footer {
     background: linear-gradient(135deg, #f9fafb, #ffffff);
     border-radius: 20px;
     padding: 25px;
-    min-width: 250px;
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
@@ -665,38 +672,138 @@ footer {
 
 /* التجاوب مع الأجهزة المحمولة */
 @media (max-width: 768px) {
+    .honor-board-section {
+        padding: 40px 0;
+    }
+    
+    .honor-title-wrapper {
+        margin-bottom: 40px;
+        padding: 0 20px;
+    }
+    
+    .trophy-icon-animated {
+        font-size: 50px;
+    }
+    
     .title-top {
-        font-size: 32px;
+        font-size: 28px;
+        letter-spacing: 1px;
     }
     
     .title-bottom {
-        font-size: 18px;
+        font-size: 16px;
+    }
+    
+    .line-dec {
+        width: 80px;
+    }
+    
+    .subjects-showcase {
+        padding: 0 15px;
+        gap: 30px;
+    }
+    
+    .subject-container {
+        padding: 20px;
+        border-radius: 20px;
+    }
+    
+    .subject-header-modern {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .subject-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+    
+    .subject-name {
+        font-size: 24px;
+    }
+    
+    .subject-line {
+        display: none;
     }
     
     .podium-container {
         flex-direction: column;
         align-items: center;
+        gap: 20px;
+        padding: 20px 10px;
     }
     
     .place-1st, .place-2nd, .place-3rd {
         order: 0;
+        width: 100%;
+        max-width: 320px;
+    }
+    
+    .student-info-card {
+        min-width: auto;
+        width: 100%;
+        padding: 20px;
+    }
+    
+    .avatar-circle {
+        width: 90px;
+        height: 90px;
+        font-size: 32px;
+    }
+    
+    .avatar-circle.rank-1 {
+        width: 100px;
+        height: 100px;
+        font-size: 36px;
+    }
+    
+    .rank-crown {
+        font-size: 28px;
+        top: -12px;
+    }
+    
+    .grade-circle {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .grade-num {
+        font-size: 28px;
     }
     
     .podium-base {
         width: 100%;
-        max-width: 300px;
     }
     
-    .subject-container {
-        padding: 25px;
+    .podium-1st,
+    .podium-2nd,
+    .podium-3rd {
+        width: 100%;
+        height: 60px;
     }
     
     .hall-of-fame {
+        margin: 40px 15px 0;
         padding: 30px 20px;
+        border-radius: 20px;
+    }
+    
+    .crown-icon {
+        font-size: 40px;
+    }
+    
+    .hall-title h3 {
+        font-size: 28px;
     }
     
     .fame-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .fame-card {
+        padding: 25px;
     }
 }
 
@@ -837,5 +944,84 @@ footer {
     
     .champion-card {
         margin-bottom: 20px;
+    }
+}
+
+/* تنسيقات للشاشات الصغيرة جداً (الهواتف الصغيرة) */
+@media (max-width: 480px) {
+    .honor-board-section {
+        padding: 30px 0;
+    }
+    
+    .honor-title-wrapper {
+        padding: 0 15px;
+    }
+    
+    .trophy-icon-animated {
+        font-size: 40px;
+    }
+    
+    .title-top {
+        font-size: 24px;
+    }
+    
+    .title-bottom {
+        font-size: 14px;
+    }
+    
+    .subjects-showcase {
+        padding: 0 10px;
+    }
+    
+    .subject-container {
+        padding: 15px;
+        margin: 0 auto;
+        max-width: 100%;
+    }
+    
+    .subject-name {
+        font-size: 20px;
+    }
+    
+    .podium-container {
+        padding: 15px 5px;
+    }
+    
+    .place-1st, .place-2nd, .place-3rd {
+        max-width: 100%;
+    }
+    
+    .student-info-card {
+        padding: 15px;
+        max-width: 100%;
+    }
+    
+    .student-full-name {
+        font-size: 18px;
+    }
+    
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        font-size: 28px;
+    }
+    
+    .avatar-circle.rank-1 {
+        width: 90px;
+        height: 90px;
+        font-size: 32px;
+    }
+    
+    .hall-of-fame {
+        margin: 30px 10px 0;
+        padding: 20px 15px;
+    }
+    
+    .hall-title h3 {
+        font-size: 24px;
+    }
+    
+    .fame-card {
+        padding: 20px;
     }
 }

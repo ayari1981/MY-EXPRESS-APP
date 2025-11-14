@@ -637,10 +637,10 @@ router.get('/grades/print', ensureAdmin, async (req, res) => {
       title: 'طباعة النتائج',
       grades,
       filters: { classLevel, classNumber, subject, semester },
-      printDate: new Date().toLocaleDateString('ar-EG', { 
+      printDate: new Date().toLocaleDateString('fr-FR', { 
         year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+        month: '2-digit', 
+        day: '2-digit' 
       })
     });
   } catch (err) {

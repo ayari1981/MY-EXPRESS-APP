@@ -18,7 +18,7 @@ router.get('/dashboard', ensureStudent, async (req, res) => {
     // جلب الدروس الحديثة
     const lessons = await Lesson.findAll({ 
       where: {
-        class: studentClass,
+        studentClass: studentClass,
         isApproved: true 
       },
       include: [{
@@ -33,7 +33,7 @@ router.get('/dashboard', ensureStudent, async (req, res) => {
     // إحصائيات
     const totalLessons = await Lesson.count({
       where: {
-        class: studentClass,
+        studentClass: studentClass,
         isApproved: true
       }
     });
@@ -76,7 +76,7 @@ router.get('/lessons', ensureStudent, async (req, res) => {
     const studentClass = req.user.studentClass;
     
     let where = { 
-      class: studentClass,
+      studentClass: studentClass,
       isApproved: true 
     };
     
@@ -100,7 +100,7 @@ router.get('/lessons', ensureStudent, async (req, res) => {
     
     // جلب المواد الفريدة
     const subjects = await Lesson.findAll({
-      where: { class: studentClass, isApproved: true },
+      where: { studentClass: studentClass, isApproved: true },
       attributes: [[Lesson.sequelize.fn('DISTINCT', Lesson.sequelize.col('subject')), 'subject']],
       raw: true
     });
@@ -279,7 +279,7 @@ router.get('/profile', ensureStudent, async (req, res) => {
 // تحديث الملف الشخصي
 router.post('/profile', ensureStudent, async (req, res) => {
   try {
-    const { name, email, studentClass } = req.body;
+    const { name, email, studentClass, classNumber } = req.body;
     
     // التحقق من البيانات
     if (!name || !email || !studentClass) {
@@ -300,6 +300,7 @@ router.post('/profile', ensureStudent, async (req, res) => {
     req.user.name = name;
     req.user.email = email;
     req.user.studentClass = studentClass;
+    req.user.classNumber = classNumber || null;
     
     await req.user.save();
     

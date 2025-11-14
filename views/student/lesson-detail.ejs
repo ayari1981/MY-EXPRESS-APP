@@ -45,7 +45,7 @@
                   <span class="font-semibold"><%= lesson.teacher.name %></span>
                 </div>
                 <div class="flex items-center space-x-reverse space-x-4 text-sm">
-                  <span><i class="fas fa-calendar ml-1"></i> <%= new Date(lesson.createdAt).toLocaleDateString('ar-TN') %></span>
+                  <span><i class="fas fa-calendar ml-1"></i> <%= new Date(lesson.createdAt).toLocaleDateString('fr-FR') %></span>
                   <span><i class="fas fa-eye ml-1"></i> <%= lesson.views %> مشاهدة</span>
                   <span><i class="fas fa-download ml-1"></i> <%= lesson.downloads %> تحميل</span>
                 </div>
@@ -139,7 +139,7 @@
                             <h4 class="font-bold text-gray-800"><%= comment.user.name %></h4>
                             <span class="text-sm text-gray-500">
                               <i class="fas fa-clock ml-1"></i>
-                              <%= new Date(comment.createdAt).toLocaleDateString('ar-TN') %>
+                              <%= new Date(comment.createdAt).toLocaleDateString('fr-FR') %>
                             </span>
                           </div>
                           <p class="text-gray-700 leading-relaxed"><%= comment.content %></p>

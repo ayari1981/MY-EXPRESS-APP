@@ -216,7 +216,7 @@
                           
                           <p class="text-sm text-gray-500 mt-1">
                             <i class="fas fa-calendar ml-1"></i>
-                            <%= new Date(record.date).toLocaleDateString('ar-TN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+                            <%= new Date(record.date).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' }) %>
                           </p>
                         </div>
                       </div>
@@ -270,7 +270,7 @@
                         <span>•</span>
                         <span>
                           <i class="fas fa-clock ml-1"></i>
-                          <%= new Date(record.createdAt).toLocaleDateString('ar-TN') %>
+                          <%= new Date(record.createdAt).toLocaleDateString('fr-FR') %>
                         </span>
                       </div>
                     </div>

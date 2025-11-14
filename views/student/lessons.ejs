@@ -17,7 +17,18 @@
           <i class="fas fa-books ml-2 text-primary-600"></i>
           جميع الدروس
         </h1>
-        <p class="text-gray-600">تصفح وحمل الدروس الخاصة بقسمك: <span class="font-semibold text-primary-600"><%= user.studentClass %></span></p>
+        <div class="flex flex-wrap gap-3 text-gray-600">
+          <p>
+            تصفح وحمل الدروس الخاصة ب: 
+            <span class="font-semibold text-primary-600"><%= user.studentClass %></span>
+          </p>
+          <% if (user.classNumber) { %>
+          <p>
+            <i class="fas fa-users ml-1 text-green-600"></i>
+            صف <span class="font-semibold text-green-600"><%= user.classNumber %></span>
+          </p>
+          <% } %>
+        </div>
       </div>
       
       <%- include('../partials/messages') %>
@@ -102,7 +113,7 @@
                     </div>
                     <div class="flex items-center">
                       <i class="fas fa-calendar ml-1 text-gray-400"></i>
-                      <%= new Date(lesson.createdAt).toLocaleDateString('ar-TN') %>
+                      <%= new Date(lesson.createdAt).toLocaleDateString('fr-FR') %>
                     </div>
                   </div>
                   
