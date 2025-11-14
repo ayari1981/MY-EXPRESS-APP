@@ -10,17 +10,20 @@ WORKDIR /app
 # نسخ package files
 COPY package*.json ./
 
-# تثبيت dependencies للإنتاج فقط
-RUN npm ci --only=production
+# تثبيت جميع dependencies (بما فيها tailwindcss)
+RUN npm ci
 
 # نسخ باقي ملفات المشروع
 COPY . .
+
+# بناء Tailwind CSS
+RUN npx tailwindcss -i ./public/css/input.css -o ./public/css/output.css --minify
 
 # إنشاء مجلدات الرفع
 RUN mkdir -p uploads/lessons uploads/profile-pics uploads/schedules
 
 # تعيين صلاحيات المجلدات
-RUN chmod -R 755 uploads
+RUN chmod -R 755 uploads public
 
 # استخدام مستخدم غير root للأمان
 RUN addgroup -g 1001 -S nodejs && \
